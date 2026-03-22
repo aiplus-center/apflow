@@ -1,6 +1,6 @@
 # Interface Protocol
 
-The Interface Protocol defines how external clients (CLIs, Dashboards, other Agents) interact with an AI Partner Up Flow node. This specification is **mandatory** for all implementations.
+The Interface Protocol defines how external clients (CLIs, Dashboards, other Agents) interact with an AI Perceivable Flow node. This specification is **mandatory** for all implementations.
 
 ## Protocol Standards
 

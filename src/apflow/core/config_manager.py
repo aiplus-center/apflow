@@ -109,7 +109,7 @@ class ConfigManager:
 
         Loads unified configuration from config.cli.yaml (if exists):
         1. Project-local: <project>/.data/config.cli.yaml
-        2. User-global: ~/.aipartnerup/apflow/config.cli.yaml
+        2. User-global: ~/.aiperceivable/apflow/config.cli.yaml
 
         Falls back to environment variables (.env) if config file doesn't exist:
         - APFLOW_BASE_URL: Full API server URL (e.g., http://localhost:8000)

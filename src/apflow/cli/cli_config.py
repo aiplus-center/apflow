@@ -9,7 +9,7 @@ File Structure:
 Location Priority:
   1. APFLOW_CONFIG_DIR environment variable (highest priority)
   2. Project-local: <project_root>/.data/ (if in project)
-  3. User-global: ~/.aipartnerup/apflow/ (default fallback)
+  3. User-global: ~/.aiperceivable/apflow/ (default fallback)
 
 Permissions:
   config.cli.yaml  - 600 (owner-only access, more secure)
@@ -43,7 +43,7 @@ except ImportError:
     yaml = None  # type: ignore
 
 # User-global configuration (default)
-USER_CONFIG_DIR = Path.home() / ".aipartnerup" / "apflow"
+USER_CONFIG_DIR = Path.home() / ".aiperceivable" / "apflow"
 
 # Configuration file names
 CLI_CONFIG_FILE = "config.cli.yaml"  # Unified CLI configuration
@@ -75,7 +75,7 @@ def get_project_config_dir() -> Optional[Path]:
     Get project-local config directory if in project context.
 
     Note: This returns .data for consistency with project_detection module,
-    but CLI config still uses ~/.aipartnerup/apflow/ for user-global config.
+    but CLI config still uses ~/.aiperceivable/apflow/ for user-global config.
 
     Returns:
         <project_root>/.data if in project, None otherwise
@@ -92,7 +92,7 @@ def get_config_dir() -> Path:
     Priority order:
     1. APFLOW_CONFIG_DIR environment variable
     2. Project-local <project_root>/.data (if in project)
-    3. User-global ~/.aipartnerup/apflow (default)
+    3. User-global ~/.aiperceivable/apflow (default)
 
     Returns:
         Path to config directory
@@ -249,7 +249,7 @@ def load_cli_config() -> dict:
 
     Checks multiple locations in priority order:
     1. Project-local: .data/config.cli.yaml
-    2. User-global: ~/.aipartnerup/apflow/config.cli.yaml
+    2. User-global: ~/.aiperceivable/apflow/config.cli.yaml
 
     Also attempts to migrate from legacy JSON files if YAML doesn't exist.
 

@@ -104,7 +104,7 @@ Start standalone in 30 seconds with DuckDB. Scale to distributed clusters with P
 
     ---
 
-    The language-agnostic AI Partner Up Flow Protocol for cross-implementation interoperability.
+    The language-agnostic AI Perceivable Flow Protocol for cross-implementation interoperability.
 
     [Protocol](protocol/index.md)
 

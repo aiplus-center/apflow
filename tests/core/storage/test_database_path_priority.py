@@ -91,7 +91,7 @@ class TestDefaultDbPathPriority:
     ):
         """Test backward compatibility: legacy database is used when project-local doesn't exist."""
         # Create legacy database location
-        legacy_dir = mock_home_dir / ".aipartnerup" / "data"
+        legacy_dir = mock_home_dir / ".aiperceivable" / "data"
         legacy_dir.mkdir(parents=True)
         legacy_db = legacy_dir / "apflow.duckdb"
         legacy_db.touch()
@@ -112,7 +112,7 @@ class TestDefaultDbPathPriority:
         project_db = data_dir / "apflow.duckdb"
         project_db.touch()
 
-        legacy_dir = mock_home_dir / ".aipartnerup" / "data"
+        legacy_dir = mock_home_dir / ".aiperceivable" / "data"
         legacy_dir.mkdir(parents=True)
         legacy_db = legacy_dir / "apflow.duckdb"
         legacy_db.touch()
@@ -129,7 +129,7 @@ class TestDefaultDbPathPriority:
             with patch("pathlib.Path.home", return_value=mock_home_dir):
                 with patch.dict(os.environ, {}, clear=True):
                     result = _get_default_db_path()
-                    expected = str(mock_home_dir / ".aipartnerup" / "data" / "apflow.duckdb")
+                    expected = str(mock_home_dir / ".aiperceivable" / "data" / "apflow.duckdb")
                     assert result == expected
 
     def test_global_location_directory_is_created(self, temp_non_project_dir, mock_home_dir):
@@ -140,7 +140,7 @@ class TestDefaultDbPathPriority:
                     _get_default_db_path()
 
                     # Verify directory was created
-                    expected_dir = mock_home_dir / ".aipartnerup" / "data"
+                    expected_dir = mock_home_dir / ".aiperceivable" / "data"
                     assert expected_dir.exists()
                     assert expected_dir.is_dir()
 
@@ -248,7 +248,7 @@ class TestDatabasePathLogging:
         import logging
 
         # Create legacy database
-        legacy_dir = mock_home_dir / ".aipartnerup" / "data"
+        legacy_dir = mock_home_dir / ".aiperceivable" / "data"
         legacy_dir.mkdir(parents=True)
         legacy_db = legacy_dir / "apflow.duckdb"
         legacy_db.touch()
@@ -309,4 +309,4 @@ class TestDatabasePathEdgeCases:
                     result = _get_default_db_path()
                     # Empty string is falsy, so should use default logic
                     expected = str(temp_project_with_pyproject / ".data" / "apflow.duckdb")
-                    assert result == expected or ".aipartnerup" in result
+                    assert result == expected or ".aiperceivable" in result

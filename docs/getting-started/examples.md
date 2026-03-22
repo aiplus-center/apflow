@@ -12,7 +12,7 @@ The **apflow-demo** project provides:
 - Per-user demo task initialization
 - Demo task validation against executor schemas
 
-For more information, see the [apflow-demo](https://github.com/aipartnerup/apflow-demo) repository.
+For more information, see the [apflow-demo](https://github.com/aiperceivable/apflow-demo) repository.
 
 ## Executor Metadata API
 
@@ -51,7 +51,7 @@ Examples are also available in the test cases:
             "properties": {
 # Examples
 
-> **Note:** Built-in demo tasks have moved to the [apflow-demo](https://github.com/aipartnerup/apflow-demo) project. For full demo task initialization and validation, please use that repository.
+> **Note:** Built-in demo tasks have moved to the [apflow-demo](https://github.com/aiperceivable/apflow-demo) project. For full demo task initialization and validation, please use that repository.
 
 For in-project runnable examples and patterns, see:
 - [Basic Task Examples](../examples/basic_task.md)

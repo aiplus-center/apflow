@@ -1,6 +1,6 @@
 # Conformance Requirements
 
-This document defines the conformance requirements for implementations of the AI Partner Up Flow Protocol. Implementations MUST meet the requirements specified in this document to be considered protocol-compliant.
+This document defines the conformance requirements for implementations of the AI Perceivable Flow Protocol. Implementations MUST meet the requirements specified in this document to be considered protocol-compliant.
 
 ## Conformance Levels
 

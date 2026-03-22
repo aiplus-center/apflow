@@ -65,7 +65,7 @@ async def test_crewai_dependency_schema_based_mapping(sync_db_session):
             "name": "Scrape Website",
             "parent_id": "root-aggregate",
             "schemas": {"method": "scrape_executor"},
-            "inputs": {"url": "https://aipartnerup.com", "max_chars": 2000},
+            "inputs": {"url": "https://aiperceivable.com", "max_chars": 2000},
         },
         {
             "id": "analyze-task",

@@ -32,8 +32,8 @@ console = Console()
 app = typer.Typer(name="scheduler", help="Manage task scheduler")
 
 # Default scheduler PID file location
-DEFAULT_SCHEDULER_PID_FILE = Path.home() / ".aipartnerup" / "apflow-scheduler.pid"
-DEFAULT_SCHEDULER_LOG_FILE = Path.home() / ".aipartnerup" / "apflow-scheduler.log"
+DEFAULT_SCHEDULER_PID_FILE = Path.home() / ".aiperceivable" / "apflow-scheduler.pid"
+DEFAULT_SCHEDULER_LOG_FILE = Path.home() / ".aiperceivable" / "apflow-scheduler.log"
 
 
 def get_pid_file() -> Path:

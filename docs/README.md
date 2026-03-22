@@ -1,6 +1,6 @@
 # apflow Documentation
 
-The full documentation is available at **[https://aipartnerup.github.io/apflow/](https://aipartnerup.github.io/apflow/)**.
+The full documentation is available at **[https://aiperceivable.github.io/apflow/](https://aiperceivable.github.io/apflow/)**.
 
 ## Local Development
 

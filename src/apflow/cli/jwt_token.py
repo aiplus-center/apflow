@@ -5,7 +5,7 @@ Provides secure token generation with JWT algorithm support.
 Supports multiple config locations with priority:
 1. APFLOW_CONFIG_DIR environment variable (highest priority)
 2. Project-local: .data/config.cli.yaml (if in project)
-3. User-global: ~/.aipartnerup/apflow/config.cli.yaml (fallback)
+3. User-global: ~/.aiperceivable/apflow/config.cli.yaml (fallback)
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ def get_jwt_secret_path() -> Path:
 
     Uses config directory priority:
     1. Project-local: .data/config.cli.yaml
-    2. User-global: ~/.aipartnerup/apflow/config.cli.yaml
+    2. User-global: ~/.aiperceivable/apflow/config.cli.yaml
 
     Returns:
         Path to config.cli.yaml (project-local or user-global)
@@ -50,7 +50,7 @@ def ensure_local_jwt_secret() -> str:
 
     Stores secret in appropriate location:
     - Project-local: .data/config.cli.yaml (if in project)
-    - User-global: ~/.aipartnerup/apflow/config.cli.yaml (fallback)
+    - User-global: ~/.aiperceivable/apflow/config.cli.yaml (fallback)
 
     Returns:
         JWT secret string

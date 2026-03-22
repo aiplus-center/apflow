@@ -21,7 +21,7 @@ Thank you for your interest in contributing to apflow! This document provides gu
 
 ### Reporting Bugs
 
-1. **Check existing issues**: Search [GitHub Issues](https://github.com/aipartnerup/apflow/issues) to see if the bug is already reported
+1. **Check existing issues**: Search [GitHub Issues](https://github.com/aiperceivable/apflow/issues) to see if the bug is already reported
 2. **Create a new issue**: If not found, create a new issue with:
    - Clear title and description
    - Steps to reproduce
@@ -31,7 +31,7 @@ Thank you for your interest in contributing to apflow! This document provides gu
 
 ### Suggesting Features
 
-1. **Check existing discussions**: Search [GitHub Discussions](https://github.com/aipartnerup/apflow/discussions)
+1. **Check existing discussions**: Search [GitHub Discussions](https://github.com/aiperceivable/apflow/discussions)
 2. **Create a feature request**: Include:
    - Use case and motivation
    - Proposed solution
@@ -388,8 +388,8 @@ Look for issues tagged with `good-first-issue` on GitHub.
 ## Questions?
 
 - **Documentation**: Check [docs/](../README.md)
-- **Discussions**: [GitHub Discussions](https://github.com/aipartnerup/apflow/discussions)
-- **Issues**: [GitHub Issues](https://github.com/aipartnerup/apflow/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/aiperceivable/apflow/discussions)
+- **Issues**: [GitHub Issues](https://github.com/aiperceivable/apflow/issues)
 
 ## License
 

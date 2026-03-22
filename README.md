@@ -135,7 +135,7 @@ Add worker nodes at any time. The cluster auto-discovers them via the shared dat
 - [Architecture Overview](docs/architecture/overview.md) -- Design and internals
 - [Protocol Specification](docs/protocol/index.md) -- A2A Protocol spec
 
-Full documentation: [flow-docs.aipartnerup.com](https://flow-docs.aipartnerup.com)
+Full documentation: [flow-docs.aiperceivable.com](https://flow-docs.aiperceivable.com)
 
 ## Contributing
 
@@ -147,7 +147,7 @@ Apache-2.0
 
 ## Links
 
-- **Documentation**: [flow-docs.aipartnerup.com](https://flow-docs.aipartnerup.com)
-- **Website**: [aipartnerup.com](https://aipartnerup.com)
-- **GitHub**: [aipartnerup/apflow](https://github.com/aipartnerup/apflow)
+- **Documentation**: [flow-docs.aiperceivable.com](https://flow-docs.aiperceivable.com)
+- **Website**: [aiperceivable.com](https://aiperceivable.com)
+- **GitHub**: [aiperceivable/apflow](https://github.com/aiperceivable/apflow)
 - **PyPI**: [apflow](https://pypi.org/project/apflow/)

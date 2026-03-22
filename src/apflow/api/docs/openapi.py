@@ -37,7 +37,7 @@ def generate_openapi_schema(
             "description": description,
             "contact": {
                 "name": "apflow",
-                "url": "https://flow-docs.aipartnerup.com",
+                "url": "https://flow-docs.aiperceivable.com",
             },
         },
         "servers": [

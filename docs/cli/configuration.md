@@ -12,7 +12,7 @@ Configuration can be stored in multiple locations with the following priority (h
 
 1. **Environment Variable**: `APFLOW_CONFIG_DIR` (highest priority)
 2. **Project-Local**: `.data/` directory in project root
-3. **User-Global**: `~/.aipartnerup/apflow/` directory
+3. **User-Global**: `~/.aiperceivable/apflow/` directory
 4. **Default**: Current working directory (if no other location found)
 
 When you save configuration, it goes to the active location determined by this priority system.
@@ -55,7 +55,7 @@ Example output:
 Configuration Locations (in priority order):
 1. APFLOW_CONFIG_DIR env var:  Not set
 2. Project-local (.data/):     /home/user/project/.data/
-3. User-global (~/.aipartnerup/apflow/):  ~/.aipartnerup/apflow/
+3. User-global (~/.aiperceivable/apflow/):  ~/.aiperceivable/apflow/
 4. Current directory:          /home/user/project
 
 Active location: /home/user/project/.data/
@@ -148,7 +148,7 @@ When you run CLI commands, configuration is loaded from:
 
 1. **Check APFLOW_CONFIG_DIR** - If set, load from here first
 2. **Check project-local** - If `.data/config.cli.yaml` exists, load from here
-3. **Check user-global** - If `~/.aipartnerup/apflow/config.cli.yaml` exists, load from here
+3. **Check user-global** - If `~/.aiperceivable/apflow/config.cli.yaml` exists, load from here
 4. **Use defaults** - If nothing found, use built-in defaults
 
 ### How API Server Loads Configuration
@@ -174,7 +174,7 @@ cd ~/my-project
 apflow run flow --tasks '[{"id": "t1", "name": "Task 1", "schemas": {"method": "system_info_executor"}, "inputs": {"resource": "cpu"}}]'
 ```
 
-Database is created automatically in `~/.aipartnerup/data/apflow.duckdb`
+Database is created automatically in `~/.aiperceivable/data/apflow.duckdb`
 
 ### Scenario 2: Multi-Project Setup
 
@@ -201,12 +201,12 @@ Use user-global configuration for shared settings:
 ```bash
 # Set up once in home directory
 apflow config set api_server_url http://team-api.example.com
-# Saves to ~/.aipartnerup/apflow/config.cli.yaml
+# Saves to ~/.aiperceivable/apflow/config.cli.yaml
 
 # Now use from any project
 cd ~/project-a
 apflow run flow --tasks '[...]'
-# Automatically uses ~/.aipartnerup/apflow/config.cli.yaml
+# Automatically uses ~/.aiperceivable/apflow/config.cli.yaml
 ```
 
 All team members share the same API server.
@@ -315,14 +315,14 @@ apflow config gen-token --role admin --user-id user123 --save
 
 Check permissions:
 ```bash
-ls -la ~/.aipartnerup/apflow/
+ls -la ~/.aiperceivable/apflow/
 # Output:
 # -rw------- 1 user group config.cli.yaml
 ```
 
 Manually fix permissions (if needed):
 ```bash
-chmod 600 ~/.aipartnerup/apflow/config.cli.yaml
+chmod 600 ~/.aiperceivable/apflow/config.cli.yaml
 ```
 
 ## Best Practices
@@ -370,7 +370,7 @@ apflow config set api_server http://project-b-api.com
 Shared settings across all projects:
 
 ```bash
-# ✅ Good: Shared config in ~/.aipartnerup/apflow/
+# ✅ Good: Shared config in ~/.aiperceivable/apflow/
 apflow config set api_retry_count 5
 # Now all projects use this value
 ```
@@ -397,11 +397,11 @@ apflow config init-server
 
 **Solution**: Check permissions:
 ```bash
-ls -la ~/.aipartnerup/apflow/config.cli.yaml
+ls -la ~/.aiperceivable/apflow/config.cli.yaml
 # Should show: -rw------- (600)
 
 # Fix if needed:
-chmod 600 ~/.aipartnerup/apflow/config.cli.yaml
+chmod 600 ~/.aiperceivable/apflow/config.cli.yaml
 ```
 
 ### Problem: "API server URL not working"

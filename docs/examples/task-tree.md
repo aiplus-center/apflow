@@ -9,7 +9,7 @@ This example demonstrates how to use `scrape_executor` to extract the main conte
         "name": "Scrape Website Content",
         "schemas": {"method": "scrape_executor"},
         "inputs": {
-            "url": "https://aipartnerup.com",
+            "url": "https://aiperceivable.com",
             "max_chars": 5000,
             "extract_metadata": true
         }

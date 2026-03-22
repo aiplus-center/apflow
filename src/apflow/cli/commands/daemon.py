@@ -17,8 +17,8 @@ logger = get_logger(__name__)
 app = typer.Typer(name="daemon", help="Manage daemon service")
 
 # Default daemon PID file location
-DEFAULT_PID_FILE = Path.home() / ".aipartnerup" / "apflow.pid"
-DEFAULT_LOG_FILE = Path.home() / ".aipartnerup" / "apflow.log"
+DEFAULT_PID_FILE = Path.home() / ".aiperceivable" / "apflow.pid"
+DEFAULT_LOG_FILE = Path.home() / ".aiperceivable" / "apflow.log"
 
 
 def get_pid_file() -> Path:

@@ -54,7 +54,7 @@ result = await executor.execute({
 
 # Multi-phase mode (higher quality)
 result = await executor.execute({
-    "requirement": "Analyze aipartnerup.com website and generate report",
+    "requirement": "Analyze aiperceivable.com website and generate report",
     "generation_mode": "multi_phase",  # Use multi-phase for complex tasks
     "user_id": "user_123"
 })

@@ -543,9 +543,9 @@ def _get_default_db_path() -> str:
 
     Priority order (only for DuckDB file path, not for DATABASE_URL):
     1. Project-local .data/apflow.duckdb (if exists)
-    2. Legacy ~/.aipartnerup/data/apflow.duckdb (if exists - backward compatible)
+    2. Legacy ~/.aiperceivable/data/apflow.duckdb (if exists - backward compatible)
     3. Project-local .data/apflow.duckdb (default for new projects)
-    4. Global ~/.aipartnerup/data/apflow.duckdb (if not in project)
+    4. Global ~/.aiperceivable/data/apflow.duckdb (if not in project)
 
     Note: If DATABASE_URL or APFLOW_DATABASE_URL is set, this function is not used.
           Use those environment variables for explicit path/connection control.
@@ -559,7 +559,7 @@ def _get_default_db_path() -> str:
     project_data_dir = get_project_data_dir()
     if project_data_dir:
         new_path = project_data_dir / "apflow.duckdb"
-        old_path = Path.home() / ".aipartnerup" / "data" / "apflow.duckdb"
+        old_path = Path.home() / ".aiperceivable" / "data" / "apflow.duckdb"
 
         # Priority: new location exists, or old exists (backward compat), or create new
         if new_path.exists():
@@ -579,7 +579,7 @@ def _get_default_db_path() -> str:
 
     # Not in project - use global location
     home_dir = Path.home()
-    data_dir = home_dir / ".aipartnerup" / "data"
+    data_dir = home_dir / ".aiperceivable" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     db_path = str(data_dir / "apflow.duckdb")
     logger.debug(f"Database path: {db_path} (global)")
@@ -810,8 +810,8 @@ def get_default_session(
               - If PostgreSQL URL, uses PostgreSQL
               - Otherwise, uses project-aware default path priority:
                 * Project-local .data/apflow.duckdb (if in project)
-                * Global ~/.aipartnerup/data/apflow.duckdb (if not in project)
-              - Otherwise, uses persistent database at ~/.aipartnerup/data/apflow.duckdb
+                * Global ~/.aiperceivable/data/apflow.duckdb (if not in project)
+              - Otherwise, uses persistent database at ~/.aiperceivable/data/apflow.duckdb
         async_mode: Whether to use async mode. If None:
                    - For PostgreSQL: defaults to True (async mode)
                    - For DuckDB: defaults to False (sync mode, since DuckDB doesn't support async drivers)

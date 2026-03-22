@@ -15,7 +15,7 @@ async def test_llm_generate_uses_scrape_executor():
     This is a MANUAL test that makes real API calls and should not run in CI.
     """
     executor = GenerateExecutor()
-    requirement = "Please analyze aipartnerup.com and provide an evaluation."
+    requirement = "Please analyze aiperceivable.com and provide an evaluation."
     user_id = "test_user"
 
     result = await executor.execute(
@@ -36,7 +36,7 @@ async def test_llm_generate_uses_scrape_executor():
     has_scrape = any(t.get("schemas", {}).get("method") == "scrape_executor" for t in tasks)
 
     has_website_task = any(
-        "aipartnerup.com" in str(t.get("inputs", {})).lower() or "url" in t.get("inputs", {})
+        "aiperceivable.com" in str(t.get("inputs", {})).lower() or "url" in t.get("inputs", {})
         for t in tasks
     )
 

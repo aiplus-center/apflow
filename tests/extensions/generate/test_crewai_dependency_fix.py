@@ -21,13 +21,13 @@ async def test_generated_crewai_task_no_template_variables_for_dependencies():
     """
     Verify that generated CrewAI tasks don't use template variables for dependency data.
 
-    This test generates a task tree for "analyze aipartnerup.com" and verifies that:
+    This test generates a task tree for "analyze aiperceivable.com" and verifies that:
     1. The task tree includes a scrape task followed by a CrewAI analysis task
     2. The CrewAI task description does NOT contain template variables like {content}
     3. The task can be executed without "Template variable not found" errors
     """
     executor = GenerateExecutor(user_id="test_user")
-    requirement = "Scrape aipartnerup.com and analyze the content with AI"
+    requirement = "Scrape aiperceivable.com and analyze the content with AI"
 
     result = await executor.execute(
         {

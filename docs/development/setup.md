@@ -88,12 +88,12 @@ APFLOW_API_PORT=8000     # Or use API_PORT (fallback)
 #
 # Option 3: Default (auto-detected)
 # - In project: .data/apflow.duckdb (created automatically)
-# - Outside project: ~/.aipartnerup/data/apflow.duckdb
+# - Outside project: ~/.aiperceivable/data/apflow.duckdb
 
 # Logging
 APFLOW_LOG_LEVEL=INFO  # Or use LOG_LEVEL (fallback). Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-# CLI Configuration (optional, stored in .data/ or ~/.aipartnerup/apflow/)
+# CLI Configuration (optional, stored in .data/ or ~/.aiperceivable/apflow/)
 # APFLOW_CONFIG_DIR=/custom/config/path  # Override config directory location
 ```
 
@@ -124,7 +124,7 @@ apflow config show-path  # Show file locations and priorities
 
 **Configuration Storage**:
 - **Project-local** (highest priority): `.data/` directory
-- **User-global** (fallback): `~/.aipartnerup/apflow/` directory
+- **User-global** (fallback): `~/.aiperceivable/apflow/` directory
 - **Files**:
   - `config.cli.yaml` (600) - All CLI settings (sensitive and non-sensitive)
 
@@ -662,8 +662,8 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 - **User Documentation**: [README.md](../../README.md)
 - **Changelog**: [CHANGELOG.md](../../CHANGELOG.md)
-- **Website**: [aipartnerup.com](https://aipartnerup.com)
-- **Issue Tracker**: [GitHub Issues](https://github.com/aipartnerup/apflow/issues)
+- **Website**: [aiperceivable.com](https://aiperceivable.com)
+- **Issue Tracker**: [GitHub Issues](https://github.com/aiperceivable/apflow/issues)
 
 ## Getting Help
 

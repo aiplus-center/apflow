@@ -1,6 +1,6 @@
 # Protocol Overview
 
-The AI Partner Up Flow Protocol defines the standard for interaction between different components of the system, enabling interoperability across multiple language implementations.
+The AI Perceivable Flow Protocol defines the standard for interaction between different components of the system, enabling interoperability across multiple language implementations.
 
 ## Protocol Goals
 

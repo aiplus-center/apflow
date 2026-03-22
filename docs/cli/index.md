@@ -68,7 +68,7 @@ See [examples.md](./examples.md) for complex workflows, parallel execution, and 
 
 1. Environment variable: `APFLOW_CONFIG_DIR` (highest)
 2. Project-local: `.data/` directory
-3. User-global: `~/.aipartnerup/apflow/`
+3. User-global: `~/.aiperceivable/apflow/`
 4. Default: Current directory (lowest)
 
 ### File Structure

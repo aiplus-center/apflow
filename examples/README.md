@@ -136,7 +136,7 @@ python executor_examples/rest_executor_example.py
 ## Need Help?
 
 - **Documentation**: [docs/](../docs/)
-- **GitHub Issues**: [Report bugs](https://github.com/aipartnerup/apflow/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/aiperceivable/apflow/issues)
 - **FAQ**: [docs/guides/faq.md](../docs/guides/faq.md)
 
 ## Contributing Examples

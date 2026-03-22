@@ -1,12 +1,12 @@
 site_name: apflow Documentation
 site_description: Task Orchestration and Execution Framework Documentation
-site_url: https://aipartnerup.github.io/apflow/
-repo_url: https://github.com/aipartnerup/apflow
-repo_name: aipartnerup/apflow
+site_url: https://aiperceivable.github.io/apflow/
+repo_url: https://github.com/aiperceivable/apflow
+repo_name: aiperceivable/apflow
 edit_uri: edit/main/docs/
 
 # Copyright
-copyright: Copyright &copy; 2025 aipartnerup
+copyright: Copyright &copy; 2025 aiperceivable
 
 # Theme
 theme:
@@ -159,6 +159,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/aipartnerup/apflow
+      link: https://github.com/aiperceivable/apflow
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/apflow/

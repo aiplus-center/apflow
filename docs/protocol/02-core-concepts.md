@@ -1,6 +1,6 @@
 # Core Concepts
 
-This section defines the fundamental concepts of the AI Partner Up Flow Protocol. Understanding these concepts is essential for implementing the protocol in any language.
+This section defines the fundamental concepts of the AI Perceivable Flow Protocol. Understanding these concepts is essential for implementing the protocol in any language.
 
 ## Protocol Independence
 

@@ -33,7 +33,7 @@ async def test_generate_crewai_executor_task():
     executor = GenerateExecutor()
     requirement = (
         "Create a workflow with these tasks: "
-        "1. Scrape the AI Partner Up website "
+        "1. Scrape the AI Perceivable website "
         "2. Use an AI crew to analyze the scraped content "
         "3. Generate a summary report"
     )
@@ -310,7 +310,7 @@ async def test_generate_executor_validates_crewai_tasks():
 async def test_crewai_executor_real_analysis():
     """
     Real integration test: Use GenerateExecutor to produce a task tree that includes
-    a crewai_executor task with a full works structure to analyze aipartnerup.com.
+    a crewai_executor task with a full works structure to analyze aiperceivable.com.
 
     This test:
     1. Calls GenerateExecutor with an explicit requirement to use crewai_executor
@@ -320,7 +320,7 @@ async def test_crewai_executor_real_analysis():
     executor = GenerateExecutor()
     requirement = (
         "You MUST generate a task tree that includes a crewai_executor task with full works structure. "
-        "The crew must analyze aipartnerup.com and produce a report. "
+        "The crew must analyze aiperceivable.com and produce a report. "
         "Requirements for crewai_executor inputs.works: "
         "agents is an object with at least two agents (each has role and goal), "
         "tasks is an object with at least two tasks (each has description and agent), "

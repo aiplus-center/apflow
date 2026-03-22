@@ -69,7 +69,7 @@ Route all database access through a single API server:
 │  TaskRepository             │
 │    ↓                         │
 │  DuckDB Instance            │
-│  (~/.aipartnerup/data/)    │
+│  (~/.aiperceivable/data/)    │
 └─────────────────────────────┘
 ```
 

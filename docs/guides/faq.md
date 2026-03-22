@@ -534,10 +534,10 @@ task = await task_manager.task_repository.create_task(
 - **[Documentation Index](../index.md)** - Browse all documentation
 - **[Quick Start Guide](../getting-started/quick-start.md)** - Get started quickly
 - **[Examples](../examples/basic_task.md)** - See practical examples
-- **[GitHub Issues](https://github.com/aipartnerup/apflow/issues)** - Report bugs
-- **[GitHub Discussions](https://github.com/aipartnerup/apflow/discussions)** - Ask questions
+- **[GitHub Issues](https://github.com/aiperceivable/apflow/issues)** - Report bugs
+- **[GitHub Discussions](https://github.com/aiperceivable/apflow/discussions)** - Ask questions
 
 ---
 
-**Found an issue?** [Report it on GitHub](https://github.com/aipartnerup/apflow/issues)
+**Found an issue?** [Report it on GitHub](https://github.com/aiperceivable/apflow/issues)
 

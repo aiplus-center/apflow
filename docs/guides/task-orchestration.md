@@ -925,7 +925,7 @@ This separation ensures that:
 - Executors should only use `params` for initialization, process `inputs` as business data, and return a clean `result`.
 - Never mix configuration into `inputs` or `result`.
 
-For detailed field definitions and examples, see the [Data Model Protocol documentation](https://flow-docs.aipartnerup.com/protocol/03-data-model/).
+For detailed field definitions and examples, see the [Data Model Protocol documentation](https://flow-docs.aiperceivable.com/protocol/03-data-model/).
 
 ## Next Steps
 

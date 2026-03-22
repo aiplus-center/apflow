@@ -105,6 +105,6 @@ def test_content_truncation(html_with_metadata: str) -> None:
 def test_real_website_scrape() -> None:
     tool = LimitedScrapeWebsiteTool()
     # Using a simple real website for testing
-    result = tool._run("https://flow-docs.aipartnerup.com", max_chars=10000)
+    result = tool._run("https://flow-docs.aiperceivable.com", max_chars=10000)
     print("=== Scrape Result ===")
     print(result)

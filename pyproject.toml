@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apflow"
-version = "0.18.1"
+version = "0.18.2"
 description = "Agent workflow orchestration and execution platform"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "aipartnerup", email = "tercel.yi@gmail.com"}
+    {name = "aiperceivable", email = "tercel.yi@gmail.com"}
 ]
 license = {text = "Apache-2.0"}
 keywords = ["ai", "agent", "orchestration", "workflow", "task", "crewai", "a2a"]
@@ -218,5 +218,5 @@ base_package = "apflow"
 src_dir = "src"
 
 [project.urls]
-Homepage = "https://aipartnerup.com"
-Source = "https://github.com/aipartnerup/apflow" 
+Homepage = "https://aiperceivable.com"
+Source = "https://github.com/aiperceivable/apflow" 

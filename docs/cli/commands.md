@@ -710,7 +710,7 @@ apflow tasks list | grep task-id
 # Check database configuration
 echo $DATABASE_URL
 # Or check DuckDB file
-ls ~/.aipartnerup/data/apflow.duckdb
+ls ~/.aiperceivable/data/apflow.duckdb
 ```
 
 **Error: "Invalid task format"**

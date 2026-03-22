@@ -105,7 +105,7 @@ For contributing to apflow or running tests locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/aipartnerup/apflow.git
+git clone https://github.com/aiperceivable/apflow.git
 cd apflow
 
 # Create virtual environment

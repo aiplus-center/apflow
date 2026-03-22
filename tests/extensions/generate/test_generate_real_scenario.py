@@ -43,7 +43,7 @@ load_env_file()
 @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OPENAI_API_KEY not set in environment")
 async def test_generate_website_analysis_with_auto_fix():
     """
-    Real integration test: Generate task tree for analyzing aipartnerup.com.
+    Real integration test: Generate task tree for analyzing aiperceivable.com.
 
     This test:
     1. Calls GenerateExecutor with real AI to generate a task tree
@@ -52,7 +52,7 @@ async def test_generate_website_analysis_with_auto_fix():
     4. Ensures the final task tree passes all validations
     """
     executor = GenerateExecutor(user_id="demo_user_91c0194805d17ad1")
-    requirement = "please analyze aipartnerup.com and give a report"
+    requirement = "please analyze aiperceivable.com and give a report"
 
     print(f"\n{'='*80}")
     print(f"Requirement: {requirement}")
@@ -128,9 +128,9 @@ async def test_manual_multi_executor_scenario_with_auto_fix():
     tasks_with_multiple_executors = [
         {
             "id": "root-task-1",
-            "name": "Analyze AI Partner Up Website",
+            "name": "Analyze AI Perceivable Website",
             "schemas": {"method": "scrape_executor"},
-            "inputs": {"url": "https://aipartnerup.com", "user_id": "demo_user_91c0194805d17ad1"},
+            "inputs": {"url": "https://aiperceivable.com", "user_id": "demo_user_91c0194805d17ad1"},
         },
         {
             "id": "task-2",
@@ -284,7 +284,7 @@ async def test_end_to_end_generate_and_execute_website_analysis():
     3. Executes the entire task tree using TaskManager
     4. Validates the execution results
 
-    User requirement: "please analyze aipartnerup.com and give a report with json format"
+    User requirement: "please analyze aiperceivable.com and give a report with json format"
     """
     print(f"\n{'='*80}")
     print("END-TO-END TEST: Generate + Execute Website Analysis")
@@ -293,7 +293,7 @@ async def test_end_to_end_generate_and_execute_website_analysis():
     # Step 1: Generate task tree
     print("Step 1: Generating task tree from requirement...")
     generator = GenerateExecutor(user_id="demo_user_91c0194805d17ad1")
-    requirement = "please analyze aipartnerup.com and give a report with json format"
+    requirement = "please analyze aiperceivable.com and give a report with json format"
 
     print(f"Requirement: {requirement}\n")
 
@@ -1040,7 +1040,7 @@ async def test_scrape_crewai_template_variable_validation():
     print(f"{'='*80}\n")
 
     executor = GenerateExecutor(user_id="test_user")
-    requirement = "Scrape aipartnerup.com and analyze the content with AI to generate a report"
+    requirement = "Scrape aiperceivable.com and analyze the content with AI to generate a report"
 
     print(f"Requirement: {requirement}\n")
 
@@ -1323,10 +1323,10 @@ async def test_crewai_dependency_data_injection_fix():
         },
         {
             "id": scrape_id,
-            "name": "Scrape AI Partner Up",
+            "name": "Scrape AI Perceivable",
             "parent_id": root_id,
             "schemas": {"method": "scrape_executor"},
-            "inputs": {"url": "https://aipartnerup.com", "max_chars": 3000},
+            "inputs": {"url": "https://aiperceivable.com", "max_chars": 3000},
             "user_id": "demo_user_91c0194805d17ad1",
         },
         {

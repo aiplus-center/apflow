@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.18.2] - 2026-03-22
+
+### Changed
+- Rebrand: aipartnerup → aiperceivable
+
 ## [0.18.1] 2026-02-18
 
 ### Added
@@ -630,7 +635,7 @@
   - **Multi-location configuration support**:
     - Priority 1 (highest): `APFLOW_CONFIG_DIR` environment variable
     - Priority 2: Project-local `.data/` directory (if in project with pyproject.toml/.git)
-    - Priority 3: User-global `~/.aipartnerup/apflow/` (default fallback)
+    - Priority 3: User-global `~/.aiperceivable/apflow/` (default fallback)
   - **Separated secrets architecture**:
     - `config.cli.yaml` (600 permissions) - Unified configuration (all settings: api_server_url, timeouts, tokens, jwt_secret, etc.)
   - Single file with multi-location priority system (project-local and user-global)
@@ -648,9 +653,9 @@
 ## [0.10.0] 2026-01-01
 
 ### Changed
-- **Refactor import paths from aipartnerupflow to apflow across test files**
+- **Refactor import paths from aiperceivableflow to apflow across test files**
   - Updated import statements in various test files to reflect the new module structure under apflow.
-  - Ensured all references to aipartnerupflow are replaced with apflow in test modules related to extensions, including but not limited to:
+  - Ensured all references to aiperceivableflow are replaced with apflow in test modules related to extensions, including but not limited to:
     - crewai
     - docker
     - generate
@@ -967,7 +972,7 @@
   - **Migration**: Demo task initialization has been moved to the **apflow-demo** project
   - Demo task definitions are now managed separately from the core library
   - This keeps the core library focused on orchestration functionality
-  - For demo tasks, please use [apflow-demo](https://github.com/aipartnerup/apflow-demo)
+  - For demo tasks, please use [apflow-demo](https://github.com/aiperceivable/apflow-demo)
 
 - **Examples API Methods**
   - Removed `examples.init` and `examples.status` API methods from system routes

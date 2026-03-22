@@ -71,7 +71,7 @@ Demonstrates a task created by linking to a completed source task.
 **Note:** For `origin_type: link` or `archive`, the `original_task_id` MUST reference a task in `completed` status (in principle).
 # Protocol Examples
 
-This section provides comprehensive examples demonstrating the AI Partner Up Flow Protocol. These examples are language-agnostic and can be implemented in any programming language.
+This section provides comprehensive examples demonstrating the AI Perceivable Flow Protocol. These examples are language-agnostic and can be implemented in any programming language.
 
 ## Example 1: Simple Task Execution
 

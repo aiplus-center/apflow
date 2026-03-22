@@ -513,7 +513,7 @@ def show_path():
     typer.echo("\n💡 Priority (highest to lowest):")
     typer.echo("  1. APFLOW_CONFIG_DIR environment variable")
     typer.echo("  2. Project-local: <project>/.data/")
-    typer.echo("  3. User-global: ~/.aipartnerup/apflow/ (default)")
+    typer.echo("  3. User-global: ~/.aiperceivable/apflow/ (default)")
 
     typer.echo("\n🔒 File Permissions:")
     typer.echo("  config.cli.yaml: 600 (owner-only access)")

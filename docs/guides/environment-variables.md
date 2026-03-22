@@ -26,9 +26,9 @@ When both are set, `APFLOW_*` variables take precedence. This design allows apfl
 **Priority for DuckDB file location:**
 1. `APFLOW_DATABASE_URL` or `DATABASE_URL` (if set)
 2. `.data/apflow.duckdb` (if exists in project)
-3. `~/.aipartnerup/data/apflow.duckdb` (if exists, legacy)
+3. `~/.aiperceivable/data/apflow.duckdb` (if exists, legacy)
 4. `.data/apflow.duckdb` (default for new projects)
-5. `~/.aipartnerup/data/apflow.duckdb` (default outside projects)
+5. `~/.aiperceivable/data/apflow.duckdb` (default outside projects)
 
 **Examples:**
 ```bash
@@ -130,7 +130,7 @@ APFLOW_CORS_ALLOW_ALL=true
 **Default locations (priority order):**
 1. `APFLOW_CONFIG_DIR` (if set)
 2. `.data/` (if in project)
-3. `~/.aipartnerup/apflow/`
+3. `~/.aiperceivable/apflow/`
 
 ## Storage Configuration
 
@@ -366,7 +366,7 @@ When multiple configuration sources exist, apflow follows this priority:
 
 1. **Environment variables with APFLOW_ prefix** (highest)
 2. **Generic environment variables** (fallback)
-3. **CLI config files** (`.data/` or `~/.aipartnerup/apflow/`)
+3. **CLI config files** (`.data/` or `~/.aiperceivable/apflow/`)
 4. **Default values** (lowest)
 
 This allows maximum flexibility while maintaining sensible defaults.

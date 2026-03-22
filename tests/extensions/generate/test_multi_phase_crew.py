@@ -52,7 +52,7 @@ class TestMultiPhaseGenerationCrew:
             mock_crew_class.return_value = mock_crew_instance
 
             result = await crew._phase1_analyze_requirement(
-                requirement="Please analyze the aipartnerup.com website and provide a report.",
+                requirement="Please analyze the aiperceivable.com website and provide a report.",
                 executors_info="Available executors...",
                 principles="Framework principles...",
             )
@@ -102,7 +102,7 @@ class TestMultiPhaseGenerationCrew:
             mock_crew_class.return_value = mock_crew_instance
 
             result = await crew._phase2_design_structure(
-                requirement="Please analyze the aipartnerup.com website and provide a report.",
+                requirement="Please analyze the aiperceivable.com website and provide a report.",
                 analysis=analysis,
                 executors_info="Available executors...",
                 principles="Framework principles...",
@@ -154,7 +154,7 @@ class TestMultiPhaseGenerationCrew:
                 "schemas": {"method": "scrape_executor"},
                 "parent_id": "550e8400-e29b-41d4-a716-446655440001",
                 "dependencies": [],
-                "inputs": {"url": "https://aipartnerup.com"},
+                "inputs": {"url": "https://aiperceivable.com"},
             },
         ]
 
@@ -164,7 +164,7 @@ class TestMultiPhaseGenerationCrew:
             mock_crew_class.return_value = mock_crew_instance
 
             result = await crew._phase3_generate_inputs(
-                requirement="Please analyze the aipartnerup.com website and provide a report.",
+                requirement="Please analyze the aiperceivable.com website and provide a report.",
                 structure=structure,
                 executors_info="Available executors...",
             )
@@ -176,7 +176,7 @@ class TestMultiPhaseGenerationCrew:
             # Check inputs are present
             assert "inputs" in tasks[0]
             assert "inputs" in tasks[1]
-            assert tasks[1]["inputs"]["url"] == "https://aipartnerup.com"
+            assert tasks[1]["inputs"]["url"] == "https://aiperceivable.com"
 
     @pytest.mark.asyncio
     async def test_phase4_review_and_validate(self, crew, mock_crew_result):
@@ -207,7 +207,7 @@ class TestMultiPhaseGenerationCrew:
 
             result = await crew._phase4_review_and_validate(
                 tasks=tasks_input,
-                requirement="Please analyze the aipartnerup.com website and provide a report.",
+                requirement="Please analyze the aiperceivable.com website and provide a report.",
                 principles="Framework principles...",
             )
 
@@ -220,7 +220,7 @@ class TestMultiPhaseGenerationCrew:
         """Test complete 4-phase generation flow with user's original example"""
         # Phase 1 result
         analysis_data = {
-            "goal": "Analyze aipartnerup.com website and generate report",
+            "goal": "Analyze aiperceivable.com website and generate report",
             "steps": ["Scrape website", "Analyze content"],
             "executors_needed": ["scrape_executor", "llm_executor"],
             "needs_aggregator": True,
@@ -271,7 +271,7 @@ class TestMultiPhaseGenerationCrew:
                 "schemas": {"method": "scrape_executor"},
                 "parent_id": "550e8400-e29b-41d4-a716-446655440001",
                 "dependencies": [],
-                "inputs": {"url": "https://aipartnerup.com"},
+                "inputs": {"url": "https://aiperceivable.com"},
             },
             {
                 "id": "550e8400-e29b-41d4-a716-446655440003",
@@ -307,7 +307,7 @@ class TestMultiPhaseGenerationCrew:
             mock_crew_class.return_value = mock_crew_instance
 
             result = await crew.generate(
-                requirement="Please analyze the aipartnerup.com website and provide a report.",
+                requirement="Please analyze the aiperceivable.com website and provide a report.",
                 user_id="test_user",
             )
 
@@ -328,7 +328,7 @@ class TestMultiPhaseGenerationCrew:
             scrape_task = tasks[1]
             assert scrape_task["schemas"]["method"] == "scrape_executor"
             assert scrape_task["parent_id"] == root_task["id"]
-            assert scrape_task["inputs"]["url"] == "https://aipartnerup.com"
+            assert scrape_task["inputs"]["url"] == "https://aiperceivable.com"
 
             llm_task = tasks[2]
             assert llm_task["schemas"]["method"] == "llm_executor"

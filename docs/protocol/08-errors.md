@@ -1,6 +1,6 @@
 # Error Handling Specification
 
-This document defines the error handling requirements and error codes for the AI Partner Up Flow Protocol.
+This document defines the error handling requirements and error codes for the AI Perceivable Flow Protocol.
 
 ## Error Principles
 
@@ -57,7 +57,7 @@ These codes are defined by the JSON-RPC 2.0 specification:
 
 ### Protocol-Specific Error Codes
 
-These codes are specific to the AI Partner Up Flow Protocol:
+These codes are specific to the AI Perceivable Flow Protocol:
 
 | Code | Name | Description | When to Use |
 | :--- | :--- | :--- | :--- |
