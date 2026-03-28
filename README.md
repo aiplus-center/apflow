@@ -13,6 +13,10 @@ apflow makes any AI agent production-ready — regardless of which framework bui
 | Cost governance and budget enforcement | An LLM routing layer (use LiteLLM/Portkey) |
 | A bridge to MCP and A2A protocols | An observability platform (use Langfuse) |
 
+## Requirements
+
+- Python >= 3.11
+
 ## Install
 
 ```bash
@@ -143,11 +147,30 @@ Agent Frameworks (bring your own)
   LangGraph  |  CrewAI  |  OpenAI Agents  |  Any
 ```
 
+## Built-in Executors
+
+| Executor | Purpose | Extra |
+|----------|---------|-------|
+| RestExecutor | HTTP/REST API calls | core |
+| CommandExecutor | Shell command execution | core |
+| SystemInfoExecutor | System information collection | core |
+| ScrapeExecutor | Web page scraping | core |
+| WebSocketExecutor | WebSocket communication | core |
+| McpExecutor | MCP tool/resource access | core |
+| AggregateResultsExecutor | Combine results from multiple tasks | core |
+| SshExecutor | Remote SSH execution | [ssh] |
+| DockerExecutor | Containerized execution | [docker] |
+| SendEmailExecutor | Email via SMTP or Resend | [email] |
+
 ## Documentation
 
 - [PRD](docs/apflow-v2/prd.md) — Product requirements
 - [Tech Design](docs/apflow-v2/tech-design.md) — Architecture and design
 - [Feature Specs](docs/features/) — Implementation specifications
+
+## Contributing
+
+Contributions welcome. Please open an issue or PR on GitHub.
 
 ## License
 

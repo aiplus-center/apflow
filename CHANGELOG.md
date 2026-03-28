@@ -1,5 +1,71 @@
 # Changelog
 
+## [0.20.0] - 2026-03-28
+
+### BREAKING CHANGES — Product Repositioning
+
+apflow v2 is repositioned from "task orchestration framework" to **AI Agent Production Middleware**. This is a major rewrite. The v1 codebase is preserved on the `v1-task-orchestration` branch.
+
+### Removed (~17,500 lines deleted)
+
+- **Self-built protocol layers**: `api/a2a/`, `api/mcp/`, `api/graphql/`, `api/docs/`, `api/routes/` — replaced by apcore ecosystem
+- **CLI**: `cli/` — replaced by apcore-cli
+- **AI framework wrappers**: `extensions/crewai/`, `extensions/llm/`, `extensions/generate/` — out of scope for middleware
+- **Other executors**: `extensions/grpc/`, `extensions/tools/` — dropped
+- **DuckDB storage**: replaced by SQLite
+- **Dependencies removed**: duckdb-engine, pytz, fastapi, uvicorn, a2a-sdk, click, rich, typer, crewai, litellm, anthropic, strawberry-graphql, grpclib, protobuf, beautifulsoup4, trafilatura
+- **Entry points removed**: `apflow` CLI and `apflow-server` commands
+- **25+ stale v1 documentation files**
+
+### Added
+
+- **apcore Module Bridge** (`bridge/`)
+  - `ExecutableTaskModuleAdapter`: wraps any executor as apcore Module
+  - `discover_executor_modules()`: auto-discovers executors via AST scanner
+  - 5 task management modules: create, execute, list, get, delete
+  - `create_apflow_registry()`: one call to register all apflow capabilities
+  - Zero config: `pip install apflow` → MCP + A2A + CLI ready
+
+- **Durable Execution** (`durability/`)
+  - `CheckpointManager`: save/load/delete execution state in `task_checkpoints` table
+  - `RetryManager`: fixed/exponential/linear backoff with jitter
+  - `CircuitBreaker`: CLOSED/OPEN/HALF_OPEN state machine per executor, thread-safe
+  - `CircuitBreakerRegistry`: thread-safe registry of per-executor breakers
+  - `ExecutableTask` interface: 3 new optional methods (`supports_checkpoint`, `get_checkpoint`, `resume_from_checkpoint`)
+  - Full TaskManager integration: circuit breaker pre-check, checkpoint loading, retry wrapping, post-execution cleanup
+
+- **Cost Governance** (`governance/`)
+  - `BudgetManager`: per-task token budget tracking with check/update
+  - `PolicyEngine`: register named policies with block/downgrade/notify/continue actions
+  - `ProviderRouter`: model downgrade chains (e.g., opus → sonnet → haiku)
+  - `UsageReporter`: aggregated usage reporting with JSON export
+  - Full TaskManager integration: pre-execution budget check with policy evaluation, post-execution token usage update
+
+- **SQLite Storage** (replacing DuckDB)
+  - `SQLiteDialect`: WAL mode, 5 PRAGMAs for optimal performance
+  - Memory mode (`sqlite:///:memory:`) for testing
+  - File mode with WAL for standalone production
+  - Zero external dependencies (Python stdlib)
+  - All 3 existing migrations ported from `information_schema` to `sqlalchemy.inspect()`
+
+- **Database Migration 004**: durability fields (6) + governance fields (5) + `task_checkpoints` table
+
+- **TaskModel extensions**: 11 new fields (checkpoint_at, resume_from, attempt_count, max_attempts, backoff_strategy, backoff_base_seconds, token_usage, token_budget, estimated_cost_usd, actual_cost_usd, cost_policy)
+
+- **TASK_TABLE_NAME validation**: regex guard against SQL injection from environment variable
+
+### Changed
+
+- **Version**: 0.18.2 → 0.20.0
+- **Python**: >= 3.10 → >= 3.11 (aligned with apcore)
+- **Positioning**: "Distributed Task Orchestration Framework" → "AI Agent Production Middleware"
+- **Core dependencies**: added apcore >= 0.14.0, apcore-mcp >= 0.11.0, apcore-a2a >= 0.3.0, apcore-cli >= 0.3.0
+- **TaskCreator**: relaxed single-root constraint, allows multi-root task forests
+- **README.md**: completely rewritten for v2
+- **CLAUDE.md**: updated with v2 architecture overview
+
+---
+
 ## [0.18.2] - 2026-03-22
 
 ### Changed
