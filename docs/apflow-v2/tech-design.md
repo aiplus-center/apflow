@@ -513,7 +513,7 @@ All three existing migrations (001, 002, 003) require this change. The pattern i
 ```toml
 [project]
 name = "apflow"
-version = "0.20.0a1"
+version = "0.20.0"
 description = "AI Agent Production Middleware"
 requires-python = ">=3.11"
 
@@ -581,7 +581,7 @@ dev = [
 
 In `src/apflow/__init__.py`:
 
-1. Update `__version__` from `"0.18.2"` to `"0.20.0a1"`.
+1. Update `__version__` from `"0.18.2"` to `"0.20.0"`.
 2. Update module docstring to replace "Task Orchestration and Execution Framework" with "AI Agent Production Middleware".
 3. Remove references to "CrewAI", "A2A Protocol Server", "CLI tools" from docstring.
 4. Remove `"create_storage"` and `"get_default_storage"` from `__all__` (deprecated backward-compat).

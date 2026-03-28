@@ -159,7 +159,7 @@ apflow v2 registers its capabilities as apcore Modules. The apcore ecosystem aut
 
 **What to update:**
 - `pyproject.toml`: remove deleted extras (`a2a`, `cli`, `graphql`, `crewai`, `llm`, `grpc`, `tools`, `standard`, `all`); add `apcore>=0.14.0`, `apcore-mcp>=0.10.1`, `apcore-a2a`, `apcore-cli>=0.3.0` as dependencies or extras
-- `__init__.py`: update description to "AI Agent Production Middleware", version to `0.20.0a1`
+- `__init__.py`: update description to "AI Agent Production Middleware", version to `0.20.0`
 - Remove `project.scripts` entries (`apflow`, `apflow-server`)
 
 **Acceptance criteria:**

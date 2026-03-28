@@ -134,24 +134,24 @@ class CheckpointManager:
     def __init__(self, db: Session) -> None:
         """Args: db (SQLAlchemy session, not None). Raises: TypeError if db is None."""
 
-    async def save_checkpoint(
+    def save_checkpoint(
         self,
         task_id: str,          # Non-empty string
-        data: Dict[str, Any],  # JSON-serializable dict
+        data: dict[str, Any],  # JSON-serializable dict
         step_name: Optional[str] = None,
     ) -> str:
-        """Save checkpoint. Returns checkpoint_id (UUID).
+        """Save checkpoint (sync). Returns checkpoint_id (UUID).
         Logic:
         1. Validate task_id non-empty.
         2. Validate data is dict.
         3. json.dumps(data) to verify serializability. Raise ValueError if fails.
         4. Generate UUID for checkpoint_id.
-        5. INSERT INTO task_checkpoints (id, task_id, checkpoint_data, step_name, created_at).
-        6. UPDATE apflow_tasks SET checkpoint_at, resume_from WHERE id = task_id.
+        5. INSERT INTO task_checkpoints via ORM.
+        6. UPDATE task checkpoint_at, resume_from via ORM query.
         7. Return checkpoint_id.
         """
 
-    async def load_checkpoint(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def load_checkpoint(self, task_id: str) -> Optional[dict[str, Any]]:
         """Load latest checkpoint. Returns None if no checkpoint exists.
         Logic:
         1. Validate task_id non-empty.
@@ -161,7 +161,7 @@ class CheckpointManager:
         5. Return parsed dict.
         """
 
-    async def delete_checkpoints(self, task_id: str) -> int:
+    def delete_checkpoints(self, task_id: str) -> int:
         """Delete all checkpoints for task. Returns count deleted.
         Logic:
         1. Validate task_id non-empty.

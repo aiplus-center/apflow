@@ -45,7 +45,7 @@ tests/extensions/tools/            # All tools tests
 
 Step-by-step changes:
 
-1. Update `version` from `"0.18.2"` to `"0.20.0a1"`.
+1. Update `version` from `"0.18.2"` to `"0.20.0"`.
 2. Update `description` from `"Agent workflow orchestration and execution platform"` to `"AI Agent Production Middleware"`.
 3. Update `requires-python` from `">=3.10"` to `">=3.11"`.
 4. Remove from `classifiers`: `"Programming Language :: Python :: 3.10"`.
@@ -63,12 +63,7 @@ Step-by-step changes:
    - `mcp` (empty, comments only)
    - `standard` (meta extra referencing deleted extras)
    - `all` (meta extra referencing deleted extras)
-8. Add new `[project.optional-dependencies]` sections:
-   ```toml
-   mcp-server = ["apcore-mcp>=0.10.1"]
-   a2a-server = ["apcore-a2a"]
-   cli-gen = ["apcore-cli>=0.3.0"]
-   ```
+8. Add `apcore-mcp>=0.11.0`, `apcore-a2a>=0.3.0`, `apcore-cli>=0.3.0` to core `dependencies` (not optional — MCP, A2A, CLI are standard features of apflow).
 9. In `dev`, remove: `"apdev[dev]>=0.1.6"`, `"jsonfinder>=0.4.0"`, `"memory-profiler>=0.61.0"`, `"psutil>=5.9.0"`.
 10. Delete `[project.scripts]` section entirely (removes `apflow` and `apflow-server` entry points).
 11. Update `[tool.black]` `target-version` to `['py311', 'py312']`.
@@ -77,7 +72,7 @@ Step-by-step changes:
 
 **`src/apflow/__init__.py`**
 
-1. Update `__version__` to `"0.20.0a1"`.
+1. Update `__version__` to `"0.20.0"`.
 2. Update module docstring:
    ```python
    """
@@ -193,5 +188,5 @@ def test_remaining_tests_pass():
 4. `pip install apflow` does not install: duckdb-engine, crewai, litellm, fastapi, uvicorn, click, rich, typer, strawberry-graphql, grpclib, protobuf, beautifulsoup4, trafilatura.
 5. Remaining test suite passes (tests for deleted modules are also removed).
 6. No `from apflow.api`, `from apflow.cli`, `from apflow.extensions.crewai`, `from apflow.extensions.llm`, `from apflow.extensions.generate`, `from apflow.extensions.grpc`, or `from apflow.extensions.tools` imports exist in preserved source code.
-7. `__version__` is `"0.20.0a1"`.
+7. `__version__` is `"0.20.0"`.
 8. `project.scripts` section is removed.

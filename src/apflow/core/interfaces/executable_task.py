@@ -13,17 +13,20 @@ from apflow.core.extensions.types import ExtensionCategory
 
 class ExecutableTask(Extension, ABC):
     """
-    Executable task interface - all executable units must implement this interface
+    Executable task interface - all executable units must implement this interface.
 
     This interface extends Extension, so all executors are registered extensions.
-    Implementations include:
-    - CrewaiExecutor [crewai]: LLM-based agent crews (via CrewAI) - available in extensions/crewai/
-    - SystemInfoExecutor [stdio]: Safe system information queries - available in extensions/stdio/
-    - CommandExecutor [stdio]: Shell command execution - available in extensions/stdio/
-    - Custom tasks: Non-LLM tasks (web scraping, API calls, data processing, etc.)
+    Built-in implementations include:
+    - RestExecutor [http]: HTTP/REST API calls
+    - SystemInfoExecutor [stdio]: Safe system information queries
+    - CommandExecutor [stdio]: Shell command execution
+    - SshExecutor [ssh]: Remote SSH execution
+    - DockerExecutor [docker]: Containerized execution
 
-    Note: BatchCrewaiExecutor is NOT an ExecutableTask. BatchCrewaiExecutor is a container that batches multiple crews
-    as an atomic operation (all crews execute, then merge results).
+    Optional methods for durable execution (v2):
+    - supports_checkpoint(): Whether this executor supports checkpoint/resume
+    - get_checkpoint(): Serialize current execution state
+    - resume_from_checkpoint(): Restore state from checkpoint
     """
 
     @property
@@ -113,7 +116,7 @@ class ExecutableTask(Extension, ABC):
         Note:
             - If executor doesn't implement this method, TaskManager will handle cancellation
               by checking cancellation status and stopping execution at checkpoints
-            - For executors that cannot be cancelled during execution (e.g., CrewaiExecutor),
+            - For executors that cannot be cancelled during execution,
               this method may return a result indicating cancellation will be checked after execution
         """
         # Default implementation: return not supported
