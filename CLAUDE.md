@@ -1,7 +1,21 @@
 # High-Quality Code Specification – Simplicity, Readability, and Maintainability First
 
 ## Project Overview
-The core of `apflow` is **task orchestration and execution specifications**. It provides a unified task orchestration framework that supports execution of multiple task types.
+`apflow` is **AI Agent Production Middleware** — framework-agnostic production middleware that makes AI agents reliable, cost-governed, and auditable.
+
+### v2 Architecture (0.20.0)
+- **bridge/**: apcore Module registration (auto-discovers executors, exposes via MCP/A2A/CLI)
+- **durability/**: Checkpoint/resume, retry with backoff, circuit breaker
+- **governance/**: Token budget management, cost policy engine, model downgrade chains
+- **core/execution/**: TaskManager with integrated durability + governance
+- **core/storage/**: SQLite (default) / PostgreSQL, SQLAlchemy ORM
+- **extensions/**: Tool executors (REST, SSH, Docker, Email, etc.) registered as apcore Modules
+
+### Key Dependencies
+- `apcore` — Schema-enforced module standard
+- `apcore-mcp` — MCP server (AI agent tool integration)
+- `apcore-a2a` — A2A server (internal network service)
+- `apcore-cli` — CLI generation (human operation)
 
 ## Core Principles
 - Prioritize **simplicity, readability, and maintainability** above all.

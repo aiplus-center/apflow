@@ -1,145 +1,153 @@
 # apflow
 
-<p align="center">
-  <img src="apflow-logo.svg" alt="apflow Logo" width="128" height="128" />
-</p>
+**AI Agent Production Middleware**
 
-**Distributed Task Orchestration Framework**
+apflow makes any AI agent production-ready — regardless of which framework built it — by providing durable execution, cost governance, and automatic protocol exposure via the apcore ecosystem.
 
-apflow is a distributed task orchestration framework that scales from a single process to multi-node clusters. It provides a unified execution interface with 12+ built-in executors, A2A protocol support, and automatic leader election with failover.
+## What apflow IS and IS NOT
 
-Start standalone in 30 seconds. Scale to distributed clusters without code changes.
+| apflow IS | apflow IS NOT |
+|---|---|
+| Production middleware for AI agents | An agent framework (use LangGraph/CrewAI/etc.) |
+| Framework-agnostic reliability layer | A replacement for your existing stack |
+| Cost governance and budget enforcement | An LLM routing layer (use LiteLLM/Portkey) |
+| A bridge to MCP and A2A protocols | An observability platform (use Langfuse) |
 
-## Deployment Modes
-
-### Standalone (Development and Small Workloads)
+## Install
 
 ```bash
 pip install apflow
 ```
 
-Single process, DuckDB storage, zero configuration. Ideal for development, testing, and small-scale automation.
+This installs core + apcore + MCP + A2A + CLI. No extras needed for full functionality.
+
+Optional:
+
+```bash
+pip install apflow[postgres]    # PostgreSQL for distributed deployment
+pip install apflow[all]         # All optional executors (SSH, Docker, Email, etc.)
+```
+
+## Quick Start
 
 ```python
-from apflow.core.builders import TaskBuilder
 from apflow import TaskManager, create_session
+from apflow.bridge import create_apflow_registry
+from apflow.durability import RetryPolicy, CheckpointManager, CircuitBreakerRegistry
+from apflow.governance import BudgetManager, PolicyEngine, CostPolicy, PolicyAction
 
-db = create_session()
-task_manager = TaskManager(db)
-result = await (
-    TaskBuilder(task_manager, "rest_executor")
-    .with_name("fetch_data")
-    .with_input("url", "https://api.example.com/data")
-    .with_input("method", "GET")
-    .execute()
+# 1. Create database session (SQLite by default, zero config)
+session = create_session()
+
+# 2. Create task manager with durability and governance
+task_manager = TaskManager(
+    session,
+    checkpoint_manager=CheckpointManager(session),
+    circuit_breaker_registry=CircuitBreakerRegistry(),
+)
+
+# 3. Register as apcore modules (auto-exposes via MCP, A2A, CLI)
+registry = create_apflow_registry(task_manager, task_creator, task_repository)
+
+# 4. Start MCP server (AI agents can now discover and call apflow)
+from apcore_mcp import serve
+serve(registry, transport="stdio")
+```
+
+## Core Features
+
+### Durable Execution (F-003)
+
+Checkpoint/resume for long-running tasks. Retry with configurable backoff. Circuit breaker for fault isolation.
+
+```python
+from apflow.durability import RetryPolicy, BackoffStrategy
+
+policy = RetryPolicy(
+    max_attempts=5,
+    backoff_strategy=BackoffStrategy.EXPONENTIAL,
+    backoff_base_seconds=2.0,
 )
 ```
 
-### Distributed Cluster (Production)
+### Cost Governance (F-004)
 
-```bash
-pip install apflow[standard]
+Token budget management with automatic model downgrade when budgets are approached.
+
+```python
+from apflow.governance import PolicyEngine, CostPolicy, PolicyAction
+
+engine = PolicyEngine()
+engine.register_policy(CostPolicy(
+    name="auto-downgrade",
+    action=PolicyAction.DOWNGRADE,
+    threshold=0.8,
+    downgrade_chain=["claude-opus-4", "claude-sonnet-4", "claude-haiku-4"],
+))
 ```
 
-PostgreSQL-backed, leader/worker topology with automatic leader election, task leasing, and horizontal scaling. Same application code -- only the runtime environment changes.
+### apcore Module Bridge (F-002)
 
-```bash
-# Leader node
-APFLOW_CLUSTER_ENABLED=true \
-APFLOW_DATABASE_URL=postgresql+asyncpg://user:pass@db:5432/apflow \
-APFLOW_NODE_ROLE=auto \
-apflow serve --port 8000
+One registration, three protocols. All apflow capabilities automatically exposed via MCP, A2A, and CLI.
 
-# Worker node (on additional machines)
-APFLOW_CLUSTER_ENABLED=true \
-APFLOW_DATABASE_URL=postgresql+asyncpg://user:pass@db:5432/apflow \
-APFLOW_NODE_ROLE=worker \
-apflow serve --port 8001
+```python
+from apflow.bridge import create_apflow_registry
+
+registry = create_apflow_registry(task_manager, task_creator, task_repository)
+
+# MCP — AI agent tool integration
+from apcore_mcp import serve
+serve(registry, transport="streamable-http", port=8000)
+
+# A2A — Internal network service
+from apcore_a2a import serve as a2a_serve
+a2a_serve(registry, name="apflow", url="http://localhost:9000")
+
+# CLI — Human operation
+from apcore_cli import create_cli
+cli = create_cli()
 ```
 
-Add worker nodes at any time. The cluster auto-discovers them via the shared database.
+## Storage
 
-## Installation Options
+- **SQLite** (default): Zero config, WAL mode, in-memory for tests
+- **PostgreSQL**: For distributed/production deployments
 
-| Extra | Command | Includes |
-|-------|---------|----------|
-| Core | `pip install apflow` | Task orchestration, DuckDB storage, core executors |
-| Standard | `pip install apflow[standard]` | Core + A2A server + CLI + CrewAI + LLM + tools |
-| A2A Server | `pip install apflow[a2a]` | A2A Protocol server (HTTP/SSE/WebSocket) |
-| CLI | `pip install apflow[cli]` | Command-line interface |
-| PostgreSQL | `pip install apflow[postgres]` | PostgreSQL storage (required for distributed) |
-| CrewAI | `pip install apflow[crewai]` | LLM-based agent crews |
-| LLM | `pip install apflow[llm]` | Direct LLM via LiteLLM (100+ providers) |
-| SSH | `pip install apflow[ssh]` | Remote command execution |
-| Docker | `pip install apflow[docker]` | Containerized execution |
-| gRPC | `pip install apflow[grpc]` | gRPC service calls |
-| Email | `pip install apflow[email]` | Email sending (SMTP) |
-| All | `pip install apflow[all]` | Everything |
+```python
+# SQLite (default)
+session = create_session()
 
-## Built-in Executors
+# SQLite in-memory (testing)
+session = create_session(path=":memory:")
 
-| Executor | Purpose | Extra |
-|----------|---------|-------|
-| RestExecutor | HTTP/REST API calls with auth and retry | core |
-| CommandExecutor | Local shell command execution | core |
-| SystemInfoExecutor | System information collection | core |
-| ScrapeExecutor | Web page scraping | core |
-| WebSocketExecutor | Bidirectional WebSocket communication | core |
-| McpExecutor | Model Context Protocol tools and data sources | core |
-| ApFlowApiExecutor | Inter-instance API calls for distributed execution | core |
-| AggregateResultsExecutor | Aggregate results from multiple tasks | core |
-| SshExecutor | Remote command execution via SSH | [ssh] |
-| DockerExecutor | Containerized command execution | [docker] |
-| GrpcExecutor | gRPC service calls | [grpc] |
-| SendEmailExecutor | Send emails via SMTP or Resend API | [email] |
-| CrewaiExecutor | LLM agent crews via CrewAI | [crewai] |
-| BatchCrewaiExecutor | Atomic batch of multiple crews | [crewai] |
-| LLMExecutor | Direct LLM interaction via LiteLLM | [llm] |
-| GenerateExecutor | Natural language to task tree via LLM | [llm] |
+# PostgreSQL (production)
+session = create_session(connection_string="postgresql://user:pass@host/db")
+```
 
 ## Architecture
 
 ```
-                    +--------------------------+
-                    |    Client / CLI / API     |
-                    +------------+-------------+
-                                 |
-              +------------------+------------------+
-              |                  |                   |
-    +---------v--------+ +------v------+ +----------v--------+
-    |   Leader Node     | | Worker Node | |   Worker Node      |
-    |  (auto-elected)   | |             | |                    |
-    |  - Task placement | |  - Execute  | |  - Execute         |
-    |  - Lease mgmt     | |  - Heartbeat| |  - Heartbeat       |
-    |  - Execute        | |             | |                    |
-    +---------+--------+ +------+------+ +----------+--------+
-              |                  |                   |
-              +------------------+------------------+
-                                 |
-                    +------------v-------------+
-                    |  PostgreSQL (shared)      |
-                    |  - Task state             |
-                    |  - Leader lease           |
-                    |  - Node registry          |
-                    +--------------------------+
-```
+Protocol Layer (apcore ecosystem)
+  apcore-mcp  |  apcore-a2a  |  apcore-cli
 
-*Standalone mode uses the same architecture with a single node and DuckDB storage.*
+Module Standard (apcore)
+  Registry  |  Executor  |  ACL  |  Middleware
+
+apflow v2 (this project)
+  Durable Execution  |  Cost Governance  |  Module Bridge
+  Task Orchestration Engine (TaskManager, TaskCreator)
+  Executors (REST, SSH, Docker, Email, ...)
+  Storage (SQLite / PostgreSQL)
+
+Agent Frameworks (bring your own)
+  LangGraph  |  CrewAI  |  OpenAI Agents  |  Any
+```
 
 ## Documentation
 
-- [Getting Started](docs/getting-started/quick-start.md) -- Up and running in 10 minutes
-- [Distributed Cluster Guide](docs/guides/distributed-cluster.md) -- Multi-node deployment
-- [Executor Selection Guide](docs/guides/executor-selection.md) -- Choose the right executor
-- [API Reference](docs/api/python.md) -- Python API documentation
-- [Architecture Overview](docs/architecture/overview.md) -- Design and internals
-- [Protocol Specification](docs/protocol/index.md) -- A2A Protocol spec
-
-Full documentation: [flow-docs.aiperceivable.com](https://flow-docs.aiperceivable.com)
-
-## Contributing
-
-Contributions are welcome. See [Contributing Guide](docs/development/contributing.md) for setup and guidelines.
+- [PRD](docs/apflow-v2/prd.md) — Product requirements
+- [Tech Design](docs/apflow-v2/tech-design.md) — Architecture and design
+- [Feature Specs](docs/features/) — Implementation specifications
 
 ## License
 
@@ -147,7 +155,6 @@ Apache-2.0
 
 ## Links
 
-- **Documentation**: [flow-docs.aiperceivable.com](https://flow-docs.aiperceivable.com)
 - **Website**: [aiperceivable.com](https://aiperceivable.com)
 - **GitHub**: [aiperceivable/apflow](https://github.com/aiperceivable/apflow)
 - **PyPI**: [apflow](https://pypi.org/project/apflow/)

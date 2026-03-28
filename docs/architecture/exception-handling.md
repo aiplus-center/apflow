@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the exception handling standards for AiPartnerUpFlow, based on best practices from FastAPI, CrewAI, and production frameworks.
+This document defines the exception handling standards for apflow.
 
 ## Exception Hierarchy
 

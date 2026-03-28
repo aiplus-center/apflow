@@ -80,6 +80,11 @@ class TaskManager:
         post_hooks: Optional[List[TaskPostHook]] = None,
         executor_instances: Optional[Dict[str, Any]] = None,
         use_demo: bool = False,
+        checkpoint_manager: Optional[Any] = None,
+        retry_manager: Optional[Any] = None,
+        circuit_breaker_registry: Optional[Any] = None,
+        budget_manager: Optional[Any] = None,
+        policy_engine: Optional[Any] = None,
     ):
         """
         Initialize TaskManager
@@ -138,6 +143,13 @@ class TaskManager:
         self._tasks_to_reexecute: set[str] = set()
         # Demo mode flag - if True, executors return demo data instead of executing
         self.use_demo = use_demo
+        # Durability (F-003): checkpoint, retry, circuit breaker
+        self._checkpoint_manager = checkpoint_manager
+        self._retry_manager = retry_manager
+        self._circuit_breaker_registry = circuit_breaker_registry
+        # Governance (F-004): budget, policy
+        self._budget_manager = budget_manager
+        self._policy_engine = policy_engine
 
     async def cancel_task(
         self, task_id: str, error_message: Optional[str] = None
@@ -911,9 +923,24 @@ class TaskManager:
                 completed_at=datetime.now(timezone.utc),
             )
 
+            # --- Governance: Update token usage post-execution ---
+            token_usage = task_result.get("token_usage") if isinstance(task_result, dict) else None
+            if token_usage and self._budget_manager:
+                try:
+                    await self._budget_manager.update_usage(task_id, token_usage)
+                except Exception as e:
+                    logger.warning(f"Task {task_id}: failed to update token usage: {e}")
+
+            # --- Durability: Record success, clean up checkpoints ---
+            if self._circuit_breaker_registry and task.name:
+                self._circuit_breaker_registry.get(task.name).record_success()
+            if self._checkpoint_manager:
+                try:
+                    self._checkpoint_manager.delete_checkpoints(task_id)
+                except Exception as e:
+                    logger.debug(f"Task {task_id}: checkpoint cleanup: {e}")
+
             # Refresh and notify
-            # Refresh session state before query to ensure we see latest database state
-            # This prevents blocking in sync sessions when there are uncommitted transactions
             if not self.is_async:
                 self.db.expire_all()
             task = await self.task_repository.get_task_by_id(task_id)
@@ -1006,8 +1033,117 @@ class TaskManager:
 
             logger.info(f"Task {task_id} execution - calling agent executor (name: {task.name})")
 
-            # Execute task using executor
-            task_result = await self._execute_task_with_schemas(task, final_inputs)
+            # --- Durability: Circuit breaker pre-check ---
+            if self._circuit_breaker_registry and task.name:
+                cb = self._circuit_breaker_registry.get(task.name)
+                if not cb.can_execute():
+                    error_msg = f"Circuit breaker OPEN for executor '{task.name}'"
+                    logger.warning(f"Task {task_id}: {error_msg}")
+                    await self.task_repository.update_task(
+                        task_id=task_id,
+                        status="failed",
+                        error=error_msg,
+                        completed_at=datetime.now(timezone.utc),
+                    )
+                    if self.stream:
+                        self.streaming_callbacks.task_failed(task_id, error_msg)
+                    return
+
+            # --- Governance: Budget pre-check ---
+            if self._budget_manager:
+                try:
+                    budget_check = await self._budget_manager.check_budget(task_id)
+                    if not budget_check.allowed:
+                        # Evaluate cost policy if configured
+                        if self._policy_engine and task.cost_policy:
+                            from apflow.governance.policy import PolicyAction
+
+                            evaluation = self._policy_engine.evaluate(
+                                task.cost_policy,
+                                budget_check.utilization,
+                            )
+                            if evaluation.action == PolicyAction.BLOCK:
+                                await self.task_repository.update_task(
+                                    task_id=task_id,
+                                    status="failed",
+                                    error=f"Budget exhausted: {evaluation.message}",
+                                    completed_at=datetime.now(timezone.utc),
+                                )
+                                if self.stream:
+                                    self.streaming_callbacks.task_failed(
+                                        task_id, evaluation.message
+                                    )
+                                return
+                            elif (
+                                evaluation.action == PolicyAction.DOWNGRADE
+                                and evaluation.model_override
+                            ):
+                                final_inputs = final_inputs or {}
+                                final_inputs["model"] = evaluation.model_override
+                                logger.info(
+                                    f"Task {task_id}: downgrading model to {evaluation.model_override}"
+                                )
+                            elif evaluation.action == PolicyAction.NOTIFY:
+                                logger.warning(f"Task {task_id}: {evaluation.message}")
+                        else:
+                            await self.task_repository.update_task(
+                                task_id=task_id,
+                                status="failed",
+                                error="Token budget exhausted and no cost policy configured.",
+                                completed_at=datetime.now(timezone.utc),
+                            )
+                            if self.stream:
+                                self.streaming_callbacks.task_failed(task_id, "Budget exhausted")
+                            return
+                except KeyError:
+                    pass  # Task not found in budget check — no budget configured
+
+            # --- Durability: Load checkpoint ---
+            if self._checkpoint_manager:
+                checkpoint_data = self._checkpoint_manager.load_checkpoint(task_id)
+                if checkpoint_data is not None:
+                    logger.info(f"Task {task_id}: resuming from checkpoint")
+                    # Merge checkpoint data into inputs for executor
+                    final_inputs = final_inputs or {}
+                    final_inputs["_checkpoint"] = checkpoint_data
+
+            # --- Execute task (with optional retry) ---
+            if self._retry_manager and task.max_attempts and task.max_attempts > 1:
+                from apflow.durability.retry import RetryPolicy, BackoffStrategy
+
+                policy = RetryPolicy(
+                    max_attempts=task.max_attempts,
+                    backoff_strategy=BackoffStrategy(task.backoff_strategy or "exponential"),
+                    backoff_base_seconds=float(task.backoff_base_seconds or 1.0),
+                )
+
+                async def _execute_fn():
+                    return await self._execute_task_with_schemas(task, final_inputs)
+
+                async def _on_retry(tid: str, attempt: int, exc: Exception):
+                    logger.warning(f"Task {tid} retry {attempt + 1}: {exc}")
+                    if self._checkpoint_manager:
+                        # Save checkpoint on retry if executor supports it
+                        async with self._executor_lock:
+                            executor = self._executor_instances.get(task_id)
+                        if executor and hasattr(executor, "get_checkpoint"):
+                            cp_data = executor.get_checkpoint()
+                            if cp_data:
+                                self._checkpoint_manager.save_checkpoint(tid, cp_data)
+                    # Update attempt count
+                    await self.task_repository.update_task(
+                        task_id=tid,
+                        attempt_count=attempt + 1,
+                    )
+
+                task_result = await self._retry_manager.execute_with_retry(
+                    task_id,
+                    policy,
+                    _execute_fn,
+                    _on_retry,
+                )
+            else:
+                task_result = await self._execute_task_with_schemas(task, final_inputs)
 
             # Handle execution result
             await self._handle_task_execution_result(task, task_id, task_result)
@@ -1018,6 +1154,10 @@ class TaskManager:
                 logger.error(f"Business error executing task {task_id}: {str(e)}")
             else:
                 logger.error(f"Error executing task {task_id}: {str(e)}", exc_info=True)
+
+            # --- Durability: Record failure on circuit breaker ---
+            if self._circuit_breaker_registry and task.name:
+                self._circuit_breaker_registry.get(task.name).record_failure()
 
             # Update task status
             if task_id:
