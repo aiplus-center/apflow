@@ -89,9 +89,9 @@ class ExtensionRegistry:
 
             # Register with class (for executors that need per-task instantiation)
             registry.register(
-                CrewaiExecutorTemplate(),
-                executor_class=CrewaiExecutor,
-                factory=lambda inputs: CrewaiExecutor(**inputs)
+                CustomExecutorTemplate(),
+                executor_class=CustomExecutor,
+                factory=lambda inputs: CustomExecutor(**inputs)
             )
         """
         # Validate extension
@@ -482,7 +482,7 @@ class ExtensionRegistry:
         If a hook already exists, it will be replaced.
 
         Args:
-            executor_id: Executor ID (e.g., "crewai_executor")
+            executor_id: Executor ID (e.g., "rest_executor")
             hook_type: "pre_hook" or "post_hook"
             hook_func: Hook function
 
@@ -588,7 +588,7 @@ def add_executor_hook(executor_id: str, hook_type: str, hook_func: Callable) -> 
     Add hook to an already registered executor (convenience function)
 
     Args:
-        executor_id: Executor ID (e.g., "crewai_executor")
+        executor_id: Executor ID (e.g., "rest_executor")
         hook_type: "pre_hook" or "post_hook"
         hook_func: Hook function
 
@@ -600,7 +600,7 @@ def add_executor_hook(executor_id: str, hook_type: str, hook_func: Callable) -> 
                 return get_demo_data(task)
             return None
 
-        add_executor_hook("crewai_executor", "pre_hook", quota_check_hook)
+        add_executor_hook("rest_executor", "pre_hook", quota_check_hook)
     """
     _registry.add_executor_hook(executor_id, hook_type, hook_func)
 

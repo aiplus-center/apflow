@@ -2,7 +2,7 @@
 Core Tools Framework
 
 Provides base tool infrastructure that is always available.
-Tools can be used independently or with extensions like CrewAI.
+Tools can be used independently or with external frameworks.
 """
 
 from apflow.core.tools.base import BaseTool

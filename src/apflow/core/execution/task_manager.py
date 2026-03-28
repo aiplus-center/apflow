@@ -1572,7 +1572,7 @@ class TaskManager:
         if input_schema:
             init_params["inputs_schema"] = input_schema
 
-        # Get model from schemas to pass to executor (for CrewAI executors)
+        # Get model from schemas to pass to executor
         model = schemas.get("model")
         if model:
             init_params["model"] = model
@@ -1945,7 +1945,7 @@ class TaskManager:
 
         Note:
             This creates a lightweight executor instance for schema discovery only.
-            The instance may not be fully initialized (e.g., crew not created for crewai_executor),
+            The instance may not be fully initialized,
             but should still provide get_input_schema() and get_output_schema() methods.
         """
         try:
@@ -1953,7 +1953,7 @@ class TaskManager:
 
             # Preferred lookup: use executor *ID* from schemas["method"].
             # Task schemas conventionally store the executor id in "method"
-            # (e.g. "crewai_executor", "scrape_executor").
+            # (e.g. "rest_executor", "ssh_executor").
             method_id: Optional[str] = None
             if getattr(task, "schemas", None):
                 method_id = task.schemas.get("method")

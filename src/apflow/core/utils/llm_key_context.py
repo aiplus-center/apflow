@@ -6,7 +6,7 @@ Supports multiple sources with configurable priority order:
 - API context: header -> LLMKeyConfigManager -> env
 - CLI context: params -> LLMKeyConfigManager -> env
 
-Note: Environment variables (OPENAI_API_KEY) are automatically read by CrewAI/LiteLLM,
+Note: Environment variables (OPENAI_API_KEY) are automatically read by LLM frameworks,
 but we also support them here for executors that need explicit key passing.
 """
 
@@ -207,7 +207,7 @@ def get_llm_key(
         logger.debug(f"Using LLM key from environment variable (provider: {provider or 'auto'})")
         return env_key
 
-    # Return None - some executors (like CrewAI) will automatically use env vars
+    # Return None - some executors will automatically use env vars
     return None
 
 

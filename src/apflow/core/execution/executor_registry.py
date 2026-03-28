@@ -2,11 +2,11 @@
 Executor registry for task execution
 
 This module provides a registry system for registering and discovering task executors.
-Task executors are registered by task_type (e.g., "stdio", "crewai", "rpc") and can be
+Task executors are registered by task_type (e.g., "stdio", "http", "ssh") and can be
 looked up by TaskManager during task execution.
 
 Supports:
-- Built-in executors (stdio, crewai, etc.)
+- Built-in executors (stdio, http, ssh, etc.)
 - Third-party executor registration
 - ID conflict detection and error reporting
 """
@@ -59,7 +59,7 @@ class ExecutorRegistry:
         Register an executor for a task type
 
         Args:
-            task_type: Task type identifier (e.g., "stdio", "crewai", "rpc")
+            task_type: Task type identifier (e.g., "stdio", "http", "ssh")
             executor_class: ExecutableTask class to register
             factory: Optional factory function to create executor instances.
                      If provided, this will be used instead of directly instantiating executor_class.
@@ -76,9 +76,9 @@ class ExecutorRegistry:
             registry.register("system_info", SystemInfoExecutor)
 
             # Register with factory function
-            def create_crew_executor(inputs):
-                return CrewaiExecutor(agents=..., tasks=...)
-            registry.register("crewai", CrewaiExecutor, factory=create_crew_executor)
+            def create_custom_executor(inputs):
+                return CustomExecutor(**inputs)
+            registry.register("custom", CustomExecutor, factory=create_custom_executor)
         """
         # Validate executor class
         if not issubclass(executor_class, ExecutableTask):

@@ -1,7 +1,7 @@
 """
 LLM Key Injector
 
-Injects LLM API keys into environment variables for CrewAI/LiteLLM.
+Injects LLM API keys into environment variables for LLM frameworks.
 Supports multiple LLM providers by detecting provider from model name or explicit provider type.
 """
 
@@ -109,7 +109,7 @@ def inject_llm_key(
         api_key: LLM API key
         provider: Explicit provider name (e.g., "openai", "anthropic")
         model_name: Model name for auto-detection
-        works: CrewAI works configuration (may contain model info)
+        works: Agent works configuration (may contain model info)
     """
     if not api_key:
         return

@@ -91,7 +91,7 @@ def get_allowed_executor_ids() -> Optional[set[str]]:
     Get the set of allowed executor IDs from environment configuration
 
     Supports two environment variables:
-    - APFLOW_EXTENSIONS: Extension directory names (e.g., "stdio", "http", "crewai")
+    - APFLOW_EXTENSIONS: Extension directory names (e.g., "stdio", "http", "ssh")
     - APFLOW_EXTENSIONS_IDS: Specific executor IDs (e.g., "system_info_executor", "rest_executor")
 
     If either is set, only those executor IDs are allowed.

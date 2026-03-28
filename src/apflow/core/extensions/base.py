@@ -93,7 +93,7 @@ class Extension(ABC):
 
         This is used for categorization within a category.
         Examples:
-        - Executor: "stdio", "crewai", "http"
+        - Executor: "stdio", "http", "ssh"
         - Storage: "sqlite", "postgres", "mongodb"
         - Hook: "pre", "post", "error"
 

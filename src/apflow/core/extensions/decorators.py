@@ -119,11 +119,11 @@ def _register_extension(
         executor_factory = factory
     else:
         # Default factory: use class constructor
-        # For executors that need special initialization (like CrewaiExecutor),
+        # For executors that need special initialization,
         # we try to pass inputs as kwargs first, then fallback to inputs parameter
         def default_factory(inputs: Dict[str, Any]) -> Any:
             try:
-                # Try to instantiate with **inputs (for classes like CrewaiExecutor)
+                # Try to instantiate with **inputs
                 # This allows passing task_id and other kwargs
                 return cls(**inputs)
             except TypeError:

@@ -32,7 +32,7 @@ class ExtensionCategory(str, Enum):
     
     Examples:
     - stdio: Command and system info executors
-    - crewai: LLM-based agent crew execution
+    - llm: LLM-based agent execution
     - http: HTTP API call executors
     - custom: User-defined task executors
     """
