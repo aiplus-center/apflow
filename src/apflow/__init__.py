@@ -19,7 +19,14 @@ Protocol integration via apcore ecosystem:
 - apcore-cli: Command-line interface [cli-gen]
 """
 
-__version__ = "0.20.0a1"
+
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _get_version
+
+try:
+    __version__ = _get_version("apflow")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 __all__ = [
     # Core framework

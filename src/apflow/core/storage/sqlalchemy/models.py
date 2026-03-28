@@ -17,6 +17,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base
 from typing import Dict, Any, Optional, TypeVar, Type
 from enum import auto, StrEnum
+import re as _re
 import uuid
 import os
 from datetime import timezone
@@ -30,6 +31,11 @@ TaskModelType = TypeVar("TaskModelType", bound="TaskModel")
 # Default: "apflow_tasks" (apflow tasks)
 # Can be overridden via APFLOW_TASK_TABLE_NAME environment variable
 TASK_TABLE_NAME = os.getenv("APFLOW_TASK_TABLE_NAME", "apflow_tasks")
+if not _re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", TASK_TABLE_NAME):
+    raise ValueError(
+        f"Invalid APFLOW_TASK_TABLE_NAME: '{TASK_TABLE_NAME}'. "
+        f"Must be a valid SQL identifier (letters, digits, underscores)."
+    )
 
 
 class TaskOriginType(StrEnum):
@@ -279,9 +285,7 @@ class TaskModel(Base):
             "estimated_cost_usd": (
                 float(self.estimated_cost_usd) if self.estimated_cost_usd else None
             ),
-            "actual_cost_usd": (
-                float(self.actual_cost_usd) if self.actual_cost_usd else None
-            ),
+            "actual_cost_usd": (float(self.actual_cost_usd) if self.actual_cost_usd else None),
             "cost_policy": self.cost_policy,
         }
 

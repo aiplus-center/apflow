@@ -66,7 +66,7 @@ def create_apflow_registry(
     # 1. Register discovered executor modules
     executor_adapters = discover_executor_modules()
     for adapter in executor_adapters:
-        module_id = f"{namespace}.{adapter._executor_id}"
+        module_id = f"{namespace}.{adapter.executor_id}"
         try:
             client.register(module_id, adapter)
             logger.debug(f"Registered executor module: {module_id}")

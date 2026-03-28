@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apflow"
-version = "0.20.0a1"
+version = "0.20.0"
 description = "AI Agent Production Middleware"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
-    {name = "aiperceivable", email = "tercel.yi@gmail.com"}
+    {name = "aiperceivable", email = "team@aiperceivable.com"}
 ]
 license = {text = "Apache-2.0"}
 keywords = ["ai", "agent", "middleware", "production", "durable-execution", "cost-governance", "apcore"]
@@ -30,17 +30,15 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "sqlalchemy-session-proxy>=0.1.0",
     "alembic>=1.13.0",
-    # apcore module standard
+    # apcore ecosystem (MCP + A2A + CLI standard)
     "apcore>=0.14.0",
+    "apcore-mcp>=0.11.0",
+    "apcore-a2a>=0.3.0",
+    "apcore-cli>=0.3.0",
 ]
 
 # Optional dependencies
 [project.optional-dependencies]
-# Protocol exposure via apcore ecosystem
-mcp-server = ["apcore-mcp>=0.10.1"]
-a2a-server = ["apcore-a2a"]
-cli-gen = ["apcore-cli>=0.3.0"]
-
 # Documentation (MkDocs with Material theme)
 docs = [
     "mkdocs>=1.6.0",
@@ -58,14 +56,17 @@ postgres = [
 ]
 
 # Task scheduling (cron-like scheduling)
-scheduling = [
-    "croniter>=1.0.0",
-]
+scheduling = ["croniter>=1.0.0"]
 
 # Tool executors (optional)
 email = ["aiosmtplib>=3.0.0"]
 ssh = ["asyncssh>=2.14.0"]
 docker = ["docker>=7.0.0"]
+
+# All optional features
+all = [
+    "apflow[postgres,scheduling,email,ssh,docker]",
+]
 
 # Development dependencies
 dev = [

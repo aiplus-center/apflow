@@ -53,6 +53,7 @@ class ExecutableTaskModuleAdapter:
         self._executor_class = executor_class
         self._executor_id = executor_id
         self._executor_name = executor_name
+        self.executor_id = executor_id
         # apcore expects plain attributes (not properties) — it may set them during registration
         self.input_schema = input_schema or {"type": "object", "properties": {}}
         self.output_schema = output_schema or {"type": "object", "properties": {}}

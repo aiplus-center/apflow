@@ -84,8 +84,8 @@ def _extract_schema(executor_class: type, method_name: str) -> Dict[str, Any]:
         schema_method = getattr(instance, method_name, None)
         if schema_method and callable(schema_method):
             return schema_method()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Cannot instantiate {executor_class.__name__}(): {e}")
 
     # Fallback: try with empty inputs
     try:
@@ -93,7 +93,11 @@ def _extract_schema(executor_class: type, method_name: str) -> Dict[str, Any]:
         schema_method = getattr(instance, method_name, None)
         if schema_method and callable(schema_method):
             return schema_method()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(
+            f"Cannot instantiate {executor_class.__name__}(inputs={{}}): {e}, using fallback schema"
+        )
 
-    return _FALLBACK_SCHEMA.copy()
+    import copy
+
+    return copy.deepcopy(_FALLBACK_SCHEMA)

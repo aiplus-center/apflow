@@ -5,7 +5,7 @@ Checkpoint manager for saving and restoring task execution state.
 import json
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,8 @@ class CheckpointManager:
 
     Checkpoints are stored in the `task_checkpoints` table and referenced
     from the task's `checkpoint_at` and `resume_from` fields.
+
+    Note: Uses synchronous SQLAlchemy Session. All methods are sync.
     """
 
     def __init__(self, db: Session) -> None:
@@ -26,10 +28,10 @@ class CheckpointManager:
             raise TypeError("db session must not be None")
         self._db = db
 
-    async def save_checkpoint(
+    def save_checkpoint(
         self,
         task_id: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         step_name: Optional[str] = None,
     ) -> str:
         """Save a checkpoint for a task.
@@ -52,7 +54,7 @@ class CheckpointManager:
         except (TypeError, ValueError) as e:
             raise ValueError(f"Checkpoint data is not JSON-serializable: {e}") from e
 
-        from apflow.core.storage.sqlalchemy.models import TaskCheckpointModel, TASK_TABLE_NAME
+        from apflow.core.storage.sqlalchemy.models import TaskCheckpointModel
 
         checkpoint_id = str(uuid.uuid4())
         checkpoint = TaskCheckpointModel(
@@ -64,22 +66,19 @@ class CheckpointManager:
         )
         self._db.add(checkpoint)
 
-        # Update task's checkpoint reference
-        from sqlalchemy import text
+        # Update task's checkpoint reference via ORM query (avoids raw SQL table name injection)
+        from apflow.core.storage.sqlalchemy.models import TaskModel
 
-        self._db.execute(
-            text(
-                f"UPDATE {TASK_TABLE_NAME} SET checkpoint_at = :ts, resume_from = :cp_id "
-                f"WHERE id = :tid"
-            ),
-            {"ts": datetime.now(timezone.utc), "cp_id": checkpoint_id, "tid": task_id},
-        )
+        task = self._db.query(TaskModel).filter(TaskModel.id == task_id).first()
+        if task is not None:
+            task.checkpoint_at = datetime.now(timezone.utc)
+            task.resume_from = checkpoint_id
 
         self._db.commit()
         logger.debug(f"Saved checkpoint {checkpoint_id} for task {task_id}")
         return checkpoint_id
 
-    async def load_checkpoint(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def load_checkpoint(self, task_id: str) -> Optional[dict[str, Any]]:
         """Load the latest checkpoint for a task.
 
         Returns:
@@ -102,7 +101,7 @@ class CheckpointManager:
 
         return json.loads(result.checkpoint_data)
 
-    async def delete_checkpoints(self, task_id: str) -> int:
+    def delete_checkpoints(self, task_id: str) -> int:
         """Delete all checkpoints for a task.
 
         Returns:

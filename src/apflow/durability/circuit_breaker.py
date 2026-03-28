@@ -66,65 +66,77 @@ class CircuitBreaker:
         self._failure_count = 0
         self._last_failure_time: float = 0.0
         self._half_open_attempts = 0
+        self._lock = Lock()
 
     @property
     def state(self) -> CircuitState:
         """Current state, with automatic OPEN -> HALF_OPEN transition after timeout."""
-        if self._state == CircuitState.OPEN:
-            elapsed = time.monotonic() - self._last_failure_time
-            if elapsed >= self._config.reset_timeout_seconds:
-                self._state = CircuitState.HALF_OPEN
-                self._half_open_attempts = 0
-                logger.info(
-                    f"Circuit breaker {self._executor_id}: OPEN -> HALF_OPEN "
-                    f"(after {elapsed:.1f}s)"
-                )
-        return self._state
+        with self._lock:
+            if self._state == CircuitState.OPEN:
+                elapsed = time.monotonic() - self._last_failure_time
+                if elapsed >= self._config.reset_timeout_seconds:
+                    self._state = CircuitState.HALF_OPEN
+                    self._half_open_attempts = 0
+                    logger.info(
+                        f"Circuit breaker {self._executor_id}: OPEN -> HALF_OPEN "
+                        f"(after {elapsed:.1f}s)"
+                    )
+            return self._state
 
     def can_execute(self) -> bool:
         """Whether execution is currently allowed."""
-        state = self.state  # Triggers auto-transition
-        if state == CircuitState.CLOSED:
-            return True
-        if state == CircuitState.HALF_OPEN:
-            if self._half_open_attempts < self._config.half_open_max_attempts:
-                self._half_open_attempts += 1
+        with self._lock:
+            # Inline state check to avoid nested lock
+            if self._state == CircuitState.OPEN:
+                elapsed = time.monotonic() - self._last_failure_time
+                if elapsed >= self._config.reset_timeout_seconds:
+                    self._state = CircuitState.HALF_OPEN
+                    self._half_open_attempts = 0
+
+            if self._state == CircuitState.CLOSED:
                 return True
-            return False
-        return False  # OPEN
+            if self._state == CircuitState.HALF_OPEN:
+                if self._half_open_attempts < self._config.half_open_max_attempts:
+                    self._half_open_attempts += 1
+                    return True
+                return False
+            return False  # OPEN
 
     def record_success(self) -> None:
         """Record a successful execution."""
-        if self._state == CircuitState.HALF_OPEN:
-            logger.info(f"Circuit breaker {self._executor_id}: HALF_OPEN -> CLOSED")
-        self._state = CircuitState.CLOSED
-        self._failure_count = 0
-        self._half_open_attempts = 0
+        with self._lock:
+            if self._state == CircuitState.HALF_OPEN:
+                logger.info(f"Circuit breaker {self._executor_id}: HALF_OPEN -> CLOSED")
+            self._state = CircuitState.CLOSED
+            self._failure_count = 0
+            self._half_open_attempts = 0
 
     def record_failure(self) -> None:
         """Record a failed execution."""
-        self._failure_count += 1
-        self._last_failure_time = time.monotonic()
+        with self._lock:
+            self._failure_count += 1
+            self._last_failure_time = time.monotonic()
 
-        if self._state == CircuitState.HALF_OPEN:
-            self._state = CircuitState.OPEN
-            self._half_open_attempts = 0
-            logger.warning(
-                f"Circuit breaker {self._executor_id}: HALF_OPEN -> OPEN (failure in test)"
-            )
-        elif self._failure_count >= self._config.failure_threshold:
-            self._state = CircuitState.OPEN
-            logger.warning(
-                f"Circuit breaker {self._executor_id}: CLOSED -> OPEN "
-                f"(failures: {self._failure_count}/{self._config.failure_threshold})"
-            )
+            if self._state == CircuitState.HALF_OPEN:
+                self._state = CircuitState.OPEN
+                self._half_open_attempts = 0
+                logger.warning(
+                    f"Circuit breaker {self._executor_id}: HALF_OPEN -> OPEN (failure in test)"
+                )
+            elif self._failure_count >= self._config.failure_threshold:
+                self._state = CircuitState.OPEN
+                logger.warning(
+                    f"Circuit breaker {self._executor_id}: CLOSED -> OPEN "
+                    f"(failures: {self._failure_count}/{self._config.failure_threshold})"
+                )
 
     def reset(self) -> None:
         """Force-reset to CLOSED state."""
-        self._state = CircuitState.CLOSED
-        self._failure_count = 0
-        self._half_open_attempts = 0
-        logger.info(f"Circuit breaker {self._executor_id}: force-reset to CLOSED")
+        with self._lock:
+            self._state = CircuitState.CLOSED
+            self._failure_count = 0
+            self._half_open_attempts = 0
+            logger.info(f"Circuit breaker {self._executor_id}: force-reset to CLOSED")
 
 
 class CircuitBreakerRegistry:

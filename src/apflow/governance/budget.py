@@ -135,8 +135,12 @@ class BudgetManager:
             "total": existing.get("total", 0) + token_usage.get("total", 0),
         }
 
+        # Update via repository's update method to respect abstraction boundary
         task.token_usage = accumulated
-        self._repo.db.commit()
+        if hasattr(self._repo, "db"):
+            self._repo.db.commit()
+        elif hasattr(self._repo, "commit"):
+            self._repo.commit()
 
         if task.token_budget is None:
             return None

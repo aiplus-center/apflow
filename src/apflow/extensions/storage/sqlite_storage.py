@@ -2,23 +2,21 @@
 SQLite storage backend extension
 
 Provides SQLite database backend as an ExtensionCategory.STORAGE extension.
+Delegates to SQLiteDialect for shared logic.
 """
 
-import json
-from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from apflow.core.extensions.decorators import storage_register
 from apflow.core.extensions.storage import StorageBackend
+from apflow.core.storage.dialects.sqlite import SQLiteDialect
 
 
 @storage_register()
 class SQLiteStorage(StorageBackend):
-    """
-    SQLite storage backend extension
+    """SQLite storage backend extension.
 
-    Provides embedded SQLite database support with WAL mode.
-    Registered as ExtensionCategory.STORAGE extension.
+    Delegates to SQLiteDialect for normalize/denormalize/connection logic.
     """
 
     id = "sqlite"
@@ -28,59 +26,22 @@ class SQLiteStorage(StorageBackend):
 
     @property
     def type(self) -> str:
-        """Extension type identifier"""
         return "sqlite"
 
-    def normalize_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Normalize data before writing to database."""
-        normalized = {}
-        for key, value in data.items():
-            if isinstance(value, (dict, list)):
-                normalized[key] = json.dumps(value)
-            else:
-                normalized[key] = value
-        return normalized
+    def normalize_data(self, data: dict[str, Any]) -> dict[str, Any]:
+        return SQLiteDialect.normalize_data(data)
 
-    def denormalize_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Denormalize data after reading from database."""
-        denormalized = {}
-        for key, value in data.items():
-            if isinstance(value, str):
-                try:
-                    denormalized[key] = json.loads(value)
-                except (json.JSONDecodeError, TypeError):
-                    denormalized[key] = value
-            else:
-                denormalized[key] = value
-        return denormalized
+    def denormalize_data(self, data: dict[str, Any]) -> dict[str, Any]:
+        return SQLiteDialect.denormalize_data(data)
 
-    def get_connection_string(self, **kwargs) -> str:
-        """
-        Generate SQLite connection string.
-
-        Args:
-            **kwargs: Connection parameters
-                - path: Database file path (default: ":memory:")
-                - connection_string: Direct connection string (if provided, used as-is)
-
-        Returns:
-            Connection string for SQLAlchemy
-        """
+    def get_connection_string(self, **kwargs: Any) -> str:
         if "connection_string" in kwargs:
             return kwargs["connection_string"]
-
         path = kwargs.get("path", ":memory:")
-        if path == ":memory:":
-            return "sqlite:///:memory:"
-        else:
-            abs_path = str(Path(path).absolute())
-            return f"sqlite:///{abs_path}"
+        return SQLiteDialect.get_connection_string(path)
 
-    def get_engine_kwargs(self) -> Dict[str, Any]:
-        """SQLite specific engine parameters."""
-        return {
-            "pool_pre_ping": True,
-        }
+    def get_engine_kwargs(self) -> dict[str, Any]:
+        return SQLiteDialect.get_engine_kwargs()
 
 
 __all__ = ["SQLiteStorage"]
