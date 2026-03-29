@@ -131,12 +131,6 @@ class WebSocketExecutor(BaseTask):
                 - response: Received response (if wait_response=True)
                 - success: Boolean indicating success
         """
-        if not WEBSOCKETS_AVAILABLE:
-            return {
-                "success": False,
-                "error": "websockets is not installed. Install it with: pip install apflow[a2a]",
-            }
-
         url = inputs.get("url")
         if not url:
             raise ValueError("url is required in inputs")
@@ -144,6 +138,12 @@ class WebSocketExecutor(BaseTask):
         message = inputs.get("message")
         if not message:
             raise ValueError("message is required in inputs")
+
+        if not WEBSOCKETS_AVAILABLE:
+            return {
+                "success": False,
+                "error": "websockets is not installed. Install it with: pip install apflow[a2a]",
+            }
 
         wait_response = inputs.get("wait_response", True)
         timeout = inputs.get("timeout", 30.0)
