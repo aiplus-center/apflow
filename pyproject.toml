@@ -30,14 +30,18 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "sqlalchemy-session-proxy>=0.1.0",
     "alembic>=1.13.0",
-    # Configuration
+    # Configuration and CLI
     "pyyaml>=6.0",
+    "click>=8.0",
     # apcore ecosystem (MCP + A2A + CLI standard)
     "apcore>=0.14.0",
     "apcore-mcp>=0.11.0",
     "apcore-a2a>=0.3.0",
     "apcore-cli>=0.3.0",
 ]
+
+[project.scripts]
+apflow = "apflow.cli:main"
 
 # Optional dependencies
 [project.optional-dependencies]
