@@ -13,8 +13,8 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 - **AI framework wrappers**: `extensions/crewai/`, `extensions/llm/`, `extensions/generate/` — out of scope for middleware
 - **Other executors**: `extensions/grpc/`, `extensions/tools/` — dropped
 - **DuckDB storage**: replaced by SQLite
-- **Dependencies removed**: duckdb-engine, pytz, fastapi, uvicorn, a2a-sdk, click, rich, typer, crewai, litellm, anthropic, strawberry-graphql, grpclib, protobuf, beautifulsoup4, trafilatura
-- **Entry points removed**: `apflow` CLI and `apflow-server` commands
+- **Dependencies removed**: duckdb-engine, pytz, fastapi, uvicorn, a2a-sdk, rich, typer, crewai, litellm, anthropic, strawberry-graphql, grpclib, protobuf, beautifulsoup4, trafilatura
+- **Entry points removed**: `apflow-server` command (replaced by `apflow serve`)
 - **25+ stale v1 documentation files**
 
 ### Added
@@ -53,6 +53,18 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 - **TaskModel extensions**: 11 new fields (checkpoint_at, resume_from, attempt_count, max_attempts, backoff_strategy, backoff_base_seconds, token_usage, token_budget, estimated_cost_usd, actual_cost_usd, cost_policy)
 
 - **TASK_TABLE_NAME validation**: regex guard against SQL injection from environment variable
+
+- **CLI entry points** (`cli.py` + `app.py`)
+  - `apflow serve`: Start A2A HTTP server with optional Explorer UI
+  - `apflow mcp`: Start MCP server (stdio, streamable-http, or SSE)
+  - `apflow info`: Show version, configuration, and registered modules
+  - `create_app()`: Factory function bootstraps full stack with durability + governance
+
+- **ConfigManager with YAML support** (`config_manager.py`)
+  - Load from: defaults → `apflow.yaml` → environment variables
+  - Env override: `api.server_url` → `APFLOW_API_SERVER_URL`
+  - Type coercion for int/float/bool/list from env strings
+  - `get(key, default)` interface for future apcore Config migration
 
 ### Changed
 
