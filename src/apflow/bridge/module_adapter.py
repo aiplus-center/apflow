@@ -5,22 +5,13 @@ apcore uses duck-typed modules: any object with input_schema, output_schema,
 description, and execute() is a valid module.
 """
 
-from dataclasses import dataclass, field
 from typing import Any, Dict
+
+from apcore import ModuleAnnotations
 
 from apflow.logger import get_logger
 
 logger = get_logger(__name__)
-
-
-@dataclass(frozen=True)
-class ModuleAnnotations:
-    """Metadata annotations for an apcore module."""
-
-    executor_id: str
-    tags: list[str] = field(default_factory=list)
-    dependencies: list[str] = field(default_factory=list)
-    always_available: bool = True
 
 
 class ExecutableTaskModuleAdapter:
@@ -58,12 +49,13 @@ class ExecutableTaskModuleAdapter:
         self.input_schema = input_schema or {"type": "object", "properties": {}}
         self.output_schema = output_schema or {"type": "object", "properties": {}}
         self.description = executor_description or executor_name
-        self.annotations = ModuleAnnotations(
-            executor_id=executor_id,
-            tags=tags or [],
-            dependencies=dependencies or [],
-            always_available=always_available,
-        )
+        self.annotations = ModuleAnnotations()
+        self.tags = tags or []
+        self.metadata = {
+            "executor_id": executor_id,
+            "dependencies": dependencies or [],
+            "always_available": always_available,
+        }
 
     async def execute(self, inputs: Dict[str, Any], context: Any = None) -> Dict[str, Any]:
         """Instantiate the executor and delegate to its execute() method."""

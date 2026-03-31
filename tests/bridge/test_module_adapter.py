@@ -50,10 +50,12 @@ class TestAdapterCreation:
 
     def test_annotations(self):
         adapter = _make_adapter(tags=["http", "api"], dependencies=["httpx"])
-        assert adapter.annotations.executor_id == "mock_executor"
-        assert adapter.annotations.tags == ["http", "api"]
-        assert adapter.annotations.dependencies == ["httpx"]
-        assert adapter.annotations.always_available is True
+        assert adapter.metadata["executor_id"] == "mock_executor"
+        assert adapter.tags == ["http", "api"]
+        assert adapter.metadata["dependencies"] == ["httpx"]
+        assert adapter.metadata["always_available"] is True
+        # apcore ModuleAnnotations should be present
+        assert hasattr(adapter.annotations, "readonly")
 
 
 class TestAdapterExecution:
