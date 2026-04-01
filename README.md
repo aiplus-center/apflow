@@ -1,17 +1,38 @@
 # apflow
 
-**AI Agent Production Middleware**
+**AI-Perceivable Distributed Orchestration**
 
-apflow makes any AI agent production-ready — regardless of which framework built it — by providing durable execution, cost governance, and automatic protocol exposure via the apcore ecosystem.
+apflow is a distributed task orchestration engine where every capability is AI-perceivable — discoverable, understandable, and invocable by AI agents through the apcore module standard.
+
+## The Tesla Analogy
+
+Think of Tesla's Full Self-Driving (FSD):
+
+```
+Tesla = Traditional car systems (brakes, steering, battery management)
+        + FSD (the AI brain that perceives and controls everything)
+
+        The braking system doesn't need to be "smart."
+        But it must be perceivable and controllable by FSD.
+
+apflow = Traditional orchestration (dependency graphs, priority scheduling,
+         distributed coordination)
+        + apcore (makes every capability AI-perceivable)
+
+        Task orchestration doesn't need AI.
+        But it must be perceivable and invocable by AI agents.
+```
+
+**Tesla doesn't build a competitor to FSD — it builds the best car that FSD can control. apflow doesn't build AI agents — it builds the best orchestration engine that AI agents can invoke.**
 
 ## What apflow IS and IS NOT
 
 | apflow IS | apflow IS NOT |
 |---|---|
-| Production middleware for AI agents | An agent framework (use LangGraph/CrewAI/etc.) |
-| Framework-agnostic reliability layer | A replacement for your existing stack |
-| Cost governance and budget enforcement | An LLM routing layer (use LiteLLM/Portkey) |
-| A bridge to MCP and A2A protocols | An observability platform (use Langfuse) |
+| A distributed orchestration engine | An AI agent framework |
+| AI-perceivable via apcore | An AI/LLM product |
+| Deterministic, reliable task coordination | A competitor to LangGraph/CrewAI |
+| The "car systems" that AI agents control | The "FSD brain" itself |
 
 ## Requirements
 
@@ -23,140 +44,88 @@ apflow makes any AI agent production-ready — regardless of which framework bui
 pip install apflow
 ```
 
-This installs core + apcore + MCP + A2A + CLI. No extras needed for full functionality.
-
-Optional:
-
-```bash
-pip install apflow[postgres]    # PostgreSQL for distributed deployment
-pip install apflow[all]         # All optional executors (SSH, Docker, Email, etc.)
-```
-
 ## Quick Start
 
 ```python
 from apflow import TaskManager, create_session
-from apflow.bridge import create_apflow_registry
-from apflow.durability import RetryPolicy, CheckpointManager, CircuitBreakerRegistry
-from apflow.governance import BudgetManager, PolicyEngine, CostPolicy, PolicyAction
+from apflow.app import create_app
 
-# 1. Create database session (SQLite by default, zero config)
-session = create_session()
+# One line to bootstrap the full stack
+app = create_app()
 
-# 2. Create task manager with durability and governance
-task_manager = TaskManager(
-    session,
-    checkpoint_manager=CheckpointManager(session),
-    circuit_breaker_registry=CircuitBreakerRegistry(),
-)
-
-# 3. Register as apcore modules (auto-exposes via MCP, A2A, CLI)
-registry = create_apflow_registry(task_manager, task_creator, task_repository)
-
-# 4. Start MCP server (AI agents can now discover and call apflow)
-from apcore_mcp import serve
-serve(registry, transport="stdio")
+# Start A2A server — AI agents can now discover and invoke orchestration
+from apcore_a2a import serve
+serve(app.registry, name="apflow")
 ```
 
-## Core Features
+```bash
+# Or from the command line
+apflow serve              # A2A HTTP server
+apflow serve --explorer   # With Explorer UI
+apflow mcp                # MCP server (for Claude/Cursor)
+apflow info               # Show registered modules
+```
 
-### Durable Execution (F-003)
+## Core Capabilities
 
-Checkpoint/resume for long-running tasks. Retry with configurable backoff. Circuit breaker for fault isolation.
+### Task Orchestration
+
+Dependency graph execution with priority scheduling, parallel execution, and result aggregation.
 
 ```python
-from apflow.durability import RetryPolicy, BackoffStrategy
-
-policy = RetryPolicy(
-    max_attempts=5,
-    backoff_strategy=BackoffStrategy.EXPONENTIAL,
-    backoff_base_seconds=2.0,
-)
+tasks = [
+    {"id": "fetch", "name": "Fetch Data", "priority": 1},
+    {"id": "process", "name": "Process", "parent_id": "fetch", "priority": 2},
+    {"id": "notify", "name": "Notify", "parent_id": "process", "priority": 3},
+]
+tree = await task_creator.create_task_tree_from_array(tasks)
+await task_manager.distribute_task_tree(tree)
 ```
 
-### Cost Governance (F-004)
+### Durable Execution
 
-Token budget management with automatic model downgrade when budgets are approached.
+Checkpoint/resume, retry with configurable backoff, circuit breaker per executor.
 
-```python
-from apflow.governance import PolicyEngine, CostPolicy, PolicyAction
+### Cost Governance
 
-engine = PolicyEngine()
-engine.register_policy(CostPolicy(
-    name="auto-downgrade",
-    action=PolicyAction.DOWNGRADE,
-    threshold=0.8,
-    downgrade_chain=["claude-opus-4", "claude-sonnet-4", "claude-haiku-4"],
-))
-```
+Token budget management, model downgrade chains, policy engine (block/downgrade/notify).
 
-### apcore Module Bridge (F-002)
+### Distributed Coordination
 
-One registration, three protocols. All apflow capabilities automatically exposed via MCP, A2A, and CLI.
+Leader election, task leasing, worker management — scales from single process to multi-node cluster.
 
-```python
-from apflow.bridge import create_apflow_registry
+### AI-Perceivable (via apcore)
 
-registry = create_apflow_registry(task_manager, task_creator, task_repository)
-
-# MCP — AI agent tool integration
-from apcore_mcp import serve
-serve(registry, transport="streamable-http", port=8000)
-
-# A2A — Internal network service
-from apcore_a2a import serve as a2a_serve
-a2a_serve(registry, name="apflow", url="http://localhost:9000")
-
-# CLI — Human operation
-from apcore_cli import create_cli
-cli = create_cli()
-```
-
-## Storage
-
-- **SQLite** (default): Zero config, WAL mode, in-memory for tests
-- **PostgreSQL**: For distributed/production deployments
-
-```python
-# SQLite (default)
-session = create_session()
-
-# SQLite in-memory (testing)
-session = create_session(path=":memory:")
-
-# PostgreSQL (production)
-session = create_session(connection_string="postgresql://user:pass@host/db")
-```
+Every orchestration capability is automatically exposed as an apcore Module:
+- **MCP** — AI agents (Claude, Cursor) discover and call orchestration tools
+- **A2A** — Other services invoke orchestration via HTTP
+- **CLI** — Humans operate orchestration from the terminal
 
 ## Architecture
 
 ```
-Protocol Layer (apcore ecosystem)
-  apcore-mcp  |  apcore-a2a  |  apcore-cli
-
-Module Standard (apcore)
-  Registry  |  Executor  |  ACL  |  Middleware
-
-apflow v2 (this project)
-  Durable Execution  |  Cost Governance  |  Module Bridge
-  Task Orchestration Engine (TaskManager, TaskCreator)
-  Executors (REST, SSH, Docker, Email, ...)
-  Storage (SQLite / PostgreSQL)
-
-Agent Frameworks (bring your own)
-  LangGraph  |  CrewAI  |  OpenAI Agents  |  Any
+AI Agents (bring your own — Claude, Gemini, LangGraph, any)
+    ↓ invoke via MCP / A2A / CLI
+apcore (Module Standard — makes everything AI-perceivable)
+    ↓
+apflow (This project — deterministic orchestration engine)
+  ├─ Task Orchestration (dependency graphs, priority, parallel)
+  ├─ Durable Execution (checkpoint, retry, circuit breaker)
+  ├─ Cost Governance (budget, policy, downgrade)
+  ├─ Distributed Runtime (leader election, leasing)
+  └─ Storage (SQLite / PostgreSQL)
 ```
 
 ## Built-in Executors
 
-| Executor | Purpose | Extra |
-|----------|---------|-------|
-| RestExecutor | HTTP/REST API calls | core |
-| AggregateResultsExecutor | Combine results from dependency tasks | core |
-| ApFlowApiExecutor | Inter-instance API calls (cluster) | core |
-| SendEmailExecutor | Email via SMTP or Resend | [email] |
+| Executor | Purpose |
+|----------|---------|
+| RestExecutor | HTTP/REST API calls (example executor) |
+| AggregateResultsExecutor | Combine results from dependency tasks |
+| ApFlowApiExecutor | Inter-instance orchestration (cluster) |
+| SendEmailExecutor | Email notifications |
 
-These are examples. The real executors are your AI agents, business logic, or any `ExecutableTask` implementation.
+These are examples and utilities. The real executors are your AI agents, business logic, or any `ExecutableTask` implementation.
 
 ## Documentation
 

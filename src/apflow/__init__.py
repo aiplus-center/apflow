@@ -1,22 +1,22 @@
 """
-apflow - AI Agent Production Middleware
+apflow - AI-Perceivable Distributed Orchestration
 
-Framework-agnostic production middleware that makes AI agents reliable,
-cost-governed, and auditable.
+A distributed task orchestration engine where every capability is
+AI-perceivable — discoverable, understandable, and invocable by
+AI agents through the apcore module standard.
 
-Core modules (always included):
-- core.interfaces: Core interfaces (ExecutableTask, BaseTask)
-- core.execution: Task orchestration (TaskManager, StreamingCallbacks)
-- core.extensions: Unified extension system (ExtensionRegistry)
-- core.storage: Database session factory (SQLite default, PostgreSQL optional)
-- bridge: apcore Module registration (auto-discovery of executors)
-- durability: Checkpoint/resume, retry with backoff, circuit breaker
-- governance: Token budget, cost policy, model downgrade, usage reporting
+Core:
+- core.execution: Task orchestration (dependency graphs, priority, parallel)
+- core.distributed: Leader election, task leasing, worker management
+- core.storage: SQLite (default) / PostgreSQL
+- bridge: apcore Module registration (auto-discovery)
+- durability: Checkpoint/resume, retry, circuit breaker
+- governance: Token budget, cost policy, model downgrade
 
-Protocol integration via apcore ecosystem:
-- apcore-mcp: Model Context Protocol server [mcp-server]
-- apcore-a2a: Agent-to-Agent Protocol server [a2a-server]
-- apcore-cli: Command-line interface [cli-gen]
+AI-perceivable via apcore ecosystem:
+- apcore-mcp: AI agents discover and invoke orchestration via MCP
+- apcore-a2a: Services invoke orchestration via A2A HTTP
+- apcore-cli: Humans operate orchestration via CLI
 """
 
 from importlib.metadata import PackageNotFoundError

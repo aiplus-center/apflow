@@ -1,21 +1,28 @@
 # High-Quality Code Specification – Simplicity, Readability, and Maintainability First
 
 ## Project Overview
-`apflow` is **AI Agent Production Middleware** — framework-agnostic production middleware that makes AI agents reliable, cost-governed, and auditable.
+`apflow` is **AI-Perceivable Distributed Orchestration** — a task orchestration engine where every capability is AI-perceivable via the apcore module standard.
+
+**The Tesla Analogy:** Tesla's braking system doesn't need to be "smart," but it must be perceivable and controllable by FSD. Similarly, apflow's task orchestration doesn't need AI, but it must be perceivable and invocable by AI agents.
+
+apflow is NOT an AI product. It is a deterministic, reliable orchestration engine that AI agents can discover, understand, and invoke through MCP/A2A/CLI.
 
 ### v2 Architecture (0.20.0)
+- **core/execution/**: TaskManager — dependency graphs, priority scheduling, parallel execution
 - **bridge/**: apcore Module registration (auto-discovers executors, exposes via MCP/A2A/CLI)
 - **durability/**: Checkpoint/resume, retry with backoff, circuit breaker
 - **governance/**: Token budget management, cost policy engine, model downgrade chains
-- **core/execution/**: TaskManager with integrated durability + governance
 - **core/storage/**: SQLite (default) / PostgreSQL, SQLAlchemy ORM
-- **extensions/**: Tool executors (REST, SSH, Docker, Email, etc.) registered as apcore Modules
+- **core/distributed/**: Leader election, task leasing, worker management
+- **extensions/**: Core executors (REST, AggregateResults, ApflowApi, Email)
+- **app.py**: Bootstrap factory — `create_app()` initializes full stack
+- **cli.py**: Entry points — `apflow serve`, `apflow mcp`, `apflow info`
 
 ### Key Dependencies
-- `apcore` — Schema-enforced module standard
-- `apcore-mcp` — MCP server (AI agent tool integration)
-- `apcore-a2a` — A2A server (internal network service)
-- `apcore-cli` — CLI generation (human operation)
+- `apcore` — Schema-enforced AI-perceivable module standard
+- `apcore-mcp` — MCP server (AI agents discover and invoke orchestration)
+- `apcore-a2a` — A2A server (services invoke orchestration via HTTP)
+- `apcore-cli` — CLI generation (humans operate orchestration)
 
 ## Core Principles
 - Prioritize **simplicity, readability, and maintainability** above all.

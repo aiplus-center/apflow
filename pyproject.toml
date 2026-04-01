@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "apflow"
 version = "0.20.0"
-description = "AI Agent Production Middleware"
+description = "AI-Perceivable Distributed Orchestration"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

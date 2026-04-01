@@ -70,7 +70,7 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 
 - **Version**: 0.18.2 → 0.20.0
 - **Python**: >= 3.10 → >= 3.11 (aligned with apcore)
-- **Positioning**: "Distributed Task Orchestration Framework" → "AI Agent Production Middleware"
+- **Positioning**: "Distributed Task Orchestration Framework" → "AI-Perceivable Distributed Orchestration"
 - **Core dependencies**: added apcore >= 0.14.0, apcore-mcp >= 0.11.0, apcore-a2a >= 0.3.0, apcore-cli >= 0.3.0
 - **TaskCreator**: relaxed single-root constraint, allows multi-root task forests
 - **README.md**: completely rewritten for v2
