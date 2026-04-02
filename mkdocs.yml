@@ -54,6 +54,7 @@ nav:
     - Cost Governance: features/cost-governance.md
     - TaskCreator Relaxation: features/task-creator-relaxation.md
   - Architecture:
+    - Task Orchestration: architecture/task-orchestration.md
     - Extension Registry: architecture/extension-registry-design.md
     - Exception Handling: architecture/exception-handling.md
     - Configuration: architecture/configuration.md

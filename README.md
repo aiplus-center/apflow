@@ -70,30 +70,37 @@ apflow info               # Show registered modules
 
 ## Core Capabilities
 
-### Task Orchestration
+### Task Orchestration (Dual Model: Structure Tree + Execution DAG)
 
-Dependency graph execution with priority scheduling, parallel execution, and result aggregation. Supports both tree structure (`parent_id`) and DAG patterns (`dependencies` for fan-in).
+apflow uses a **dual model** — structure tree (`parent_id`) for organization and execution DAG (`dependencies`) for ordering. This is not redundancy; each serves different operations:
+
+```
+parent_id    → Structure: copy, link, archive, progress aggregation
+dependencies → Execution: parallel scheduling, fan-in, result injection
+```
 
 ```python
-# Tree: sequential pipeline
-tasks = [
-    {"id": "fetch", "name": "Fetch Data", "priority": 1},
-    {"id": "process", "name": "Process", "parent_id": "fetch", "priority": 2},
-    {"id": "notify", "name": "Notify", "parent_id": "process", "priority": 3},
-]
-
-# DAG: fan-in pattern (task depends on multiple predecessors)
 tasks = [
     {"id": "a", "name": "Step A", "priority": 1},
     {"id": "b", "name": "Step B", "priority": 1},
-    {"id": "merge", "name": "Merge Results", "priority": 2,
-     "parent_id": "a",
-     "dependencies": [{"id": "a", "required": True}, {"id": "b", "required": True}]},
+    {"id": "merge", "name": "Merge", "parent_id": "a", "priority": 2,
+     "dependencies": [{"id": "a"}, {"id": "b"}]},  # fan-in: waits for both
 ]
-
 tree = await task_creator.create_task_tree_from_array(tasks)
 await task_manager.distribute_task_tree(tree)
 ```
+
+### Five Task Creation Modes
+
+| Mode | Method | When to use |
+|------|--------|-------------|
+| **Create** | `create_task_tree_from_array()` | Build a new workflow from scratch |
+| **Link** | `from_link()` | Reference a completed workflow (read-only, zero storage) |
+| **Copy** | `from_copy()` | Clone a workflow with modifications (re-run with new params) |
+| **Archive** | `from_archive()` | Freeze a workflow snapshot (audit, compliance) |
+| **Mixed** | `from_mixed()` | Partial copy + partial link (re-run only changed steps) |
+
+See [Task Orchestration Architecture](docs/architecture/task-orchestration.md) for the full design rationale.
 
 ### Durable Execution
 

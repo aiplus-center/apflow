@@ -7,6 +7,14 @@
 
 apflow is NOT an AI product. It is a deterministic, reliable orchestration engine that AI agents can discover, understand, and invoke through MCP/A2A/CLI.
 
+### Dual Model: Structure Tree + Execution DAG
+- `parent_id` → Structure tree: organizational hierarchy (supports copy, link, archive, mixed, progress)
+- `dependencies` → Execution DAG: ordering constraints (supports parallel, fan-in, result injection)
+- These are NOT redundant — the tree supports 5 operations, the DAG supports 1. See `docs/architecture/task-orchestration.md`.
+
+### Five Task Creation Modes
+- **Create** (from_array), **Link** (read-only ref), **Copy** (modifiable clone), **Archive** (frozen snapshot), **Mixed** (partial copy + link)
+
 ### v2 Architecture (0.20.0)
 - **core/execution/**: TaskManager — dependency graphs, priority scheduling, parallel execution
 - **bridge/**: apcore Module registration (auto-discovers executors, exposes via MCP/A2A/CLI)
