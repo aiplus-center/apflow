@@ -1,6 +1,6 @@
 site_name: apflow Documentation
 site_description: AI Agent Production Middleware
-site_url: https://aiperceivable.github.io/apflow/
+site_url: https://apflow.aiperceivable.com
 repo_url: https://github.com/aiperceivable/apflow
 repo_name: aiperceivable/apflow
 edit_uri: edit/main/docs/
