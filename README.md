@@ -117,17 +117,37 @@ Every orchestration capability is automatically exposed as an apcore Module:
 ## Architecture
 
 ```
-AI Agents (bring your own — Claude, Gemini, LangGraph, any)
-    ↓ invoke via MCP / A2A / CLI
-apcore (Module Standard — makes everything AI-perceivable)
+AI Agents / Services / Humans
+    ↓ discover & invoke
     ↓
-apflow (This project — deterministic orchestration engine)
-  ├─ Task Orchestration (dependency graphs, priority, parallel)
-  ├─ Durable Execution (checkpoint, retry, circuit breaker)
-  ├─ Cost Governance (budget, policy, downgrade)
-  ├─ Distributed Runtime (leader election, leasing)
-  └─ Storage (SQLite / PostgreSQL)
+┌──────────────────────────────────────────────┐
+│  apflow — AI-Perceivable Distributed         │
+│           Orchestration Engine                │
+│                                              │
+│  ┌── Protocol Exposure (apcore) ───────────┐ │
+│  │ apcore-mcp · apcore-a2a · apcore-cli    │ │
+│  │              ↕                          │ │
+│  │       apcore Registry (Modules)         │ │
+│  └──────────────┬──────────────────────────┘ │
+│                 │                             │
+│  ┌──────────────▼──────────────────────────┐ │
+│  │  Orchestration Core                     │ │
+│  │  TaskManager · TaskCreator · Scheduler  │ │
+│  │  Dependency Graphs · Priority · DAG     │ │
+│  ├─────────────────────────────────────────┤ │
+│  │  Durability    │  Governance            │ │
+│  │  Checkpoint    │  Budget · Policy       │ │
+│  │  Retry         │  Model Downgrade       │ │
+│  │  Circuit Break │  Usage Reporting       │ │
+│  ├─────────────────────────────────────────┤ │
+│  │  Infrastructure                         │ │
+│  │  SQLite/PostgreSQL · Distributed Runtime│ │
+│  │  ConfigManager · Adapters               │ │
+│  └─────────────────────────────────────────┘ │
+└──────────────────────────────────────────────┘
 ```
+
+apcore is not a separate layer — it's embedded inside apflow as the mechanism that makes orchestration capabilities AI-perceivable (like a CAN bus makes car systems perceivable to FSD).
 
 ## Built-in Executors
 

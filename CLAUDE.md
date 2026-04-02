@@ -18,10 +18,10 @@ apflow is NOT an AI product. It is a deterministic, reliable orchestration engin
 - **app.py**: Bootstrap factory — `create_app()` initializes full stack
 - **cli.py**: Entry points — `apflow serve`, `apflow mcp`, `apflow info`
 
-### Key Dependencies
-- `apcore` — Schema-enforced AI-perceivable module standard
-- `apcore-mcp` — MCP server (AI agents discover and invoke orchestration)
-- `apcore-a2a` — A2A server (services invoke orchestration via HTTP)
+### Key Dependencies (embedded, not external layers)
+- `apcore` — Module standard embedded inside apflow (like CAN bus in a car)
+- `apcore-mcp` — Protocol adapter: exposes modules as MCP tools
+- `apcore-a2a` — Protocol adapter: exposes modules as A2A skills
 - `apcore-cli` — CLI generation (humans operate orchestration)
 
 ## Core Principles
