@@ -1,5 +1,5 @@
 site_name: apflow Documentation
-site_description: AI Agent Production Middleware
+site_description: AI-Perceivable Distributed Orchestration
 site_url: https://apflow.aiperceivable.com
 repo_url: https://github.com/aiperceivable/apflow
 repo_name: aiperceivable/apflow
@@ -41,23 +41,31 @@ theme:
 
 # Navigation
 nav:
-  - Home: prd.md
+  - Home: getting-started/quick-start.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Core Concepts: getting-started/concepts.md
+  - Guides:
+    - Task Orchestration: guides/task-orchestration.md
+    - Environment Variables: guides/environment-variables.md
+  - Architecture:
+    - Task Orchestration Design: architecture/task-orchestration.md
+    - Extension Registry: architecture/extension-registry-design.md
+    - Exception Handling: architecture/exception-handling.md
+    - Configuration: architecture/configuration.md
   - Design:
     - PRD: prd.md
     - Tech Design: tech-design.md
   - Features:
     - Overview: features/overview.md
+    - Function Executor: features/function-executor.md
     - Storage Migration: features/storage-migration.md
     - Project Slimming: features/project-slimming.md
     - apcore Bridge: features/apcore-bridge.md
     - Durable Execution: features/durable-execution.md
     - Cost Governance: features/cost-governance.md
     - TaskCreator Relaxation: features/task-creator-relaxation.md
-  - Architecture:
-    - Task Orchestration: architecture/task-orchestration.md
-    - Extension Registry: architecture/extension-registry-design.md
-    - Exception Handling: architecture/exception-handling.md
-    - Configuration: architecture/configuration.md
 
 # Plugins
 plugins:
