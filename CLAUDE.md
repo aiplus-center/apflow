@@ -5,7 +5,7 @@
 
 **The Tesla Analogy:** Tesla's braking system doesn't need to be "smart," but it must be perceivable and controllable by FSD. Similarly, apflow's task orchestration doesn't need AI, but it must be perceivable and invocable by AI agents.
 
-apflow is NOT an AI product. It is a deterministic, reliable orchestration engine that AI agents can discover, understand, and invoke through MCP/A2A/CLI.
+apflow does not implement AI intelligence — it implements deterministic, reliable orchestration that is natively AI-perceivable. AI agents discover, understand, and invoke apflow's capabilities through MCP/A2A/CLI via the embedded apcore module standard.
 
 ### Dual Model: Structure Tree + Execution DAG
 - `parent_id` → Structure tree: organizational hierarchy (supports copy, link, archive, mixed, progress)
