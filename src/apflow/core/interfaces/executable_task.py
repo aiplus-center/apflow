@@ -17,13 +17,15 @@ class ExecutableTask(Extension, ABC):
 
     This interface extends Extension, so all executors are registered extensions.
     Built-in implementations include:
-    - RestExecutor [http]: HTTP/REST API calls
-    - SystemInfoExecutor [stdio]: Safe system information queries
-    - CommandExecutor [stdio]: Shell command execution
-    - SshExecutor [ssh]: Remote SSH execution
-    - DockerExecutor [docker]: Containerized execution
+    - RestExecutor: HTTP/REST API calls
+    - AggregateResultsExecutor: Combine dependency task results
+    - ApFlowApiExecutor: Inter-instance orchestration (cluster)
+    - SendEmailExecutor: Email notifications
 
-    Optional methods for durable execution (v2):
+    Use @function_executor decorator for lightweight registration
+    of any async/sync function as an executor.
+
+    Optional methods for durable execution:
     - supports_checkpoint(): Whether this executor supports checkpoint/resume
     - get_checkpoint(): Serialize current execution state
     - resume_from_checkpoint(): Restore state from checkpoint

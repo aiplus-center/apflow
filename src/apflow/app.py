@@ -7,10 +7,19 @@ session → TaskManager → TaskCreator → TaskRepository → apcore Registry.
 Used by CLI entry points (serve, mcp) and can be called programmatically.
 """
 
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from apflow.core.config_manager import get_config_manager
 from apflow.logger import get_logger
+
+if TYPE_CHECKING:
+    from apcore import Registry
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.orm import Session
+
+    from apflow.core.execution.task_creator import TaskCreator
+    from apflow.core.execution.task_manager import TaskManager
+    from apflow.core.storage.sqlalchemy.task_repository import TaskRepository
 
 logger = get_logger(__name__)
 
@@ -20,11 +29,11 @@ class ApflowApp:
 
     def __init__(
         self,
-        session: Any,
-        task_manager: Any,
-        task_creator: Any,
-        task_repository: Any,
-        registry: Any,
+        session: "Union[Session, AsyncSession]",
+        task_manager: "TaskManager",
+        task_creator: "TaskCreator",
+        task_repository: "TaskRepository",
+        registry: "Registry",
     ) -> None:
         self.session = session
         self.task_manager = task_manager

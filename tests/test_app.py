@@ -36,7 +36,7 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
-        assert "AI Agent Production Middleware" in result.output
+        assert "AI-Perceivable Distributed Orchestration" in result.output
 
     def test_serve_help(self):
         runner = CliRunner()

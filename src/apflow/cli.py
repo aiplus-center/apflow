@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 @click.group()
 @click.version_option(package_name="apflow")
 def cli() -> None:
-    """apflow — AI Agent Production Middleware"""
+    """apflow — AI-Perceivable Distributed Orchestration"""
     pass
 
 
@@ -62,7 +62,7 @@ def serve(
         host=host,
         port=port,
         name=name,
-        description="apflow AI Agent Production Middleware",
+        description="apflow AI-Perceivable Distributed Orchestration",
         url=f"http://{host}:{port}",
         explorer=explorer,
         metrics=metrics,

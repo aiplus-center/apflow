@@ -5,11 +5,18 @@ Task management service for orchestrating and executing tasks
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Union
+from typing import TYPE_CHECKING, Dict, Any, Optional, List, Union
 import asyncio
 from decimal import Decimal
 from inspect import iscoroutinefunction
 from apflow.core.storage.sqlalchemy.models import TaskModelType
+
+if TYPE_CHECKING:
+    from apflow.durability.checkpoint import CheckpointManager
+    from apflow.durability.retry import RetryManager
+    from apflow.durability.circuit_breaker import CircuitBreakerRegistry
+    from apflow.governance.budget import BudgetManager
+    from apflow.governance.policy import PolicyEngine
 from apflow.core.storage.sqlalchemy.task_repository import TaskRepository
 from apflow.core.storage.context import set_hook_context, clear_hook_context
 from apflow.core.execution.streaming_callbacks import StreamingCallbacks
@@ -80,11 +87,11 @@ class TaskManager:
         post_hooks: Optional[List[TaskPostHook]] = None,
         executor_instances: Optional[Dict[str, Any]] = None,
         use_demo: bool = False,
-        checkpoint_manager: Optional[Any] = None,
-        retry_manager: Optional[Any] = None,
-        circuit_breaker_registry: Optional[Any] = None,
-        budget_manager: Optional[Any] = None,
-        policy_engine: Optional[Any] = None,
+        checkpoint_manager: Optional["CheckpointManager"] = None,
+        retry_manager: Optional["RetryManager"] = None,
+        circuit_breaker_registry: Optional["CircuitBreakerRegistry"] = None,
+        budget_manager: Optional["BudgetManager"] = None,
+        policy_engine: Optional["PolicyEngine"] = None,
     ):
         """
         Initialize TaskManager
