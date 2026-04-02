@@ -24,8 +24,11 @@ from apflow.bridge.task_modules import (
     TaskCreateModule,
     TaskDeleteModule,
     TaskExecuteModule,
+    TaskArchiveModule,
+    TaskCopyModule,
     TaskCreateTreeModule,
     TaskGetModule,
+    TaskLinkModule,
     TaskListModule,
 )
 from apflow.logger import get_logger
@@ -78,6 +81,9 @@ def create_apflow_registry(
     task_modules = {
         "task.create": TaskCreateModule(task_creator, task_repository),
         "task.create_tree": TaskCreateTreeModule(task_creator, task_repository),
+        "task.link": TaskLinkModule(task_creator, task_repository),
+        "task.copy": TaskCopyModule(task_creator, task_repository),
+        "task.archive": TaskArchiveModule(task_creator, task_repository),
         "task.execute": TaskExecuteModule(task_manager),
         "task.list": TaskListModule(task_repository),
         "task.get": TaskGetModule(task_repository),

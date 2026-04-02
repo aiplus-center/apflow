@@ -256,9 +256,19 @@ _TASK_CREATE_TREE_INPUT = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "string", "description": "Optional task ID (auto-generated if omitted)"},
-                    "name": {"type": "string", "minLength": 1, "description": "Task name (required)"},
-                    "parent_id": {"type": "string", "description": "Parent task ID for tree structure"},
+                    "id": {
+                        "type": "string",
+                        "description": "Optional task ID (auto-generated if omitted)",
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Task name (required)",
+                    },
+                    "parent_id": {
+                        "type": "string",
+                        "description": "Parent task ID for tree structure",
+                    },
                     "priority": {
                         "type": "integer",
                         "minimum": 0,
@@ -338,4 +348,156 @@ class TaskCreateTreeModule:
             "root_task_id": tree.task.id,
             "task_count": len(task_ids),
             "task_ids": task_ids,
+        }
+
+
+_TASK_REUSE_INPUT = {
+    "type": "object",
+    "properties": {
+        "task_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID of the existing task to reuse",
+        },
+        "recursive": {
+            "type": "boolean",
+            "default": True,
+            "description": "If true, reuse entire subtree; if false, only the single task",
+        },
+        "auto_include_deps": {
+            "type": "boolean",
+            "default": True,
+            "description": "Automatically include upstream dependency tasks",
+        },
+        "overrides": {
+            "type": "object",
+            "description": "Fields to override (e.g. inputs, priority, user_id)",
+        },
+    },
+    "required": ["task_id"],
+}
+
+_TASK_REUSE_OUTPUT = {
+    "type": "object",
+    "properties": {
+        "root_task_id": {"type": "string"},
+        "task_count": {"type": "integer"},
+        "origin_type": {"type": "string"},
+    },
+}
+
+
+class TaskLinkModule:
+    """Link to a completed workflow — read-only reference, zero storage cost."""
+
+    description = (
+        "Create a read-only reference to a completed task tree. "
+        "The linked tasks point to the originals without duplicating data. "
+        "Requires the source task tree to be fully completed."
+    )
+
+    def __init__(self, task_creator: Any, task_repository: Any) -> None:
+        self._creator = task_creator
+        self._repo = task_repository
+        self.input_schema = _make_schema(_TASK_REUSE_INPUT)
+        self.output_schema = _make_schema(_TASK_REUSE_OUTPUT)
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        overrides = inputs.get("overrides", {})
+        tree = await self._creator.from_link(
+            task,
+            _recursive=inputs.get("recursive", True),
+            _auto_include_deps=inputs.get("auto_include_deps", True),
+            **overrides,
+        )
+
+        return {
+            "root_task_id": tree.task.id,
+            "task_count": len(tree.to_list()),
+            "origin_type": "link",
+        }
+
+
+class TaskCopyModule:
+    """Copy a workflow — create a modifiable clone with optional overrides."""
+
+    description = (
+        "Clone an existing task tree with new UUIDs. All dependencies are "
+        "automatically remapped. Override any field (inputs, priority, etc.) "
+        "to create a variant. Use this to re-run a workflow with different parameters."
+    )
+
+    def __init__(self, task_creator: Any, task_repository: Any) -> None:
+        self._creator = task_creator
+        self._repo = task_repository
+        self.input_schema = _make_schema(_TASK_REUSE_INPUT)
+        self.output_schema = _make_schema(_TASK_REUSE_OUTPUT)
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        overrides = inputs.get("overrides", {})
+        tree = await self._creator.from_copy(
+            task,
+            _recursive=inputs.get("recursive", True),
+            _auto_include_deps=inputs.get("auto_include_deps", True),
+            **overrides,
+        )
+
+        return {
+            "root_task_id": tree.task.id,
+            "task_count": len(tree.to_list()),
+            "origin_type": "copy",
+        }
+
+
+class TaskArchiveModule:
+    """Archive a completed workflow — create a frozen, immutable snapshot."""
+
+    description = (
+        "Freeze a completed task tree as an immutable archive. "
+        "Preserves all data including results. Used for audit trails, "
+        "compliance records, and production snapshots. "
+        "Requires the source task tree to be fully completed."
+    )
+
+    def __init__(self, task_creator: Any, task_repository: Any) -> None:
+        self._creator = task_creator
+        self._repo = task_repository
+        self.input_schema = _make_schema(_TASK_REUSE_INPUT)
+        self.output_schema = _make_schema(_TASK_REUSE_OUTPUT)
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        tree = await self._creator.from_archive(
+            task,
+            _recursive=inputs.get("recursive", True),
+            _auto_include_deps=inputs.get("auto_include_deps", True),
+        )
+
+        return {
+            "root_task_id": tree.task.id,
+            "task_count": len(tree.to_list()),
+            "origin_type": "archive",
         }
