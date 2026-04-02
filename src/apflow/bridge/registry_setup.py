@@ -25,11 +25,18 @@ from apflow.bridge.task_modules import (
     TaskDeleteModule,
     TaskExecuteModule,
     TaskArchiveModule,
+    TaskCancelModule,
+    TaskChildrenModule,
+    TaskCloneMixedModule,
     TaskCopyModule,
     TaskCreateTreeModule,
     TaskGetModule,
     TaskLinkModule,
     TaskListModule,
+    TaskRunningListModule,
+    TaskScheduledListModule,
+    TaskTreeModule,
+    TaskUpdateModule,
 )
 from apflow.logger import get_logger
 
@@ -81,13 +88,20 @@ def create_apflow_registry(
     task_modules = {
         "task.create": TaskCreateModule(task_creator, task_repository),
         "task.create_tree": TaskCreateTreeModule(task_creator, task_repository),
+        "task.execute": TaskExecuteModule(task_manager),
+        "task.cancel": TaskCancelModule(task_manager),
+        "task.get": TaskGetModule(task_repository),
+        "task.update": TaskUpdateModule(task_repository),
+        "task.list": TaskListModule(task_repository),
+        "task.delete": TaskDeleteModule(task_repository),
+        "task.tree": TaskTreeModule(task_repository),
+        "task.children": TaskChildrenModule(task_repository),
         "task.link": TaskLinkModule(task_creator, task_repository),
         "task.copy": TaskCopyModule(task_creator, task_repository),
         "task.archive": TaskArchiveModule(task_creator, task_repository),
-        "task.execute": TaskExecuteModule(task_manager),
-        "task.list": TaskListModule(task_repository),
-        "task.get": TaskGetModule(task_repository),
-        "task.delete": TaskDeleteModule(task_repository),
+        "task.clone_mixed": TaskCloneMixedModule(task_creator, task_repository),
+        "task.running": TaskRunningListModule(task_repository),
+        "task.scheduled": TaskScheduledListModule(task_repository),
     }
     for action, module in task_modules.items():
         module_id = f"{namespace}.{action}"

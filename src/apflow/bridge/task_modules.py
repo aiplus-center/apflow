@@ -501,3 +501,306 @@ class TaskArchiveModule:
             "task_count": len(tree.to_list()),
             "origin_type": "archive",
         }
+
+
+class TaskCloneMixedModule:
+    """Clone with mixed mode — partial copy + partial link in one tree."""
+
+    description = (
+        "Clone a task tree with mixed origin types: some tasks are copied (modifiable), "
+        "others are linked (read-only reference). Specify link_task_ids to choose which "
+        "tasks to link; all others are copied. Use this to re-run only changed steps."
+    )
+
+    def __init__(self, task_creator: Any, task_repository: Any) -> None:
+        self._creator = task_creator
+        self._repo = task_repository
+        self.input_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string", "minLength": 1, "description": "Source task ID"},
+                    "link_task_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Task IDs to link (reference). Others will be copied.",
+                    },
+                    "recursive": {"type": "boolean", "default": True},
+                    "overrides": {
+                        "type": "object",
+                        "description": "Fields to override on copied tasks",
+                    },
+                },
+                "required": ["task_id", "link_task_ids"],
+            }
+        )
+        self.output_schema = _make_schema(_TASK_REUSE_OUTPUT)
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        overrides = inputs.get("overrides", {})
+        tree = await self._creator.from_mixed(
+            task,
+            _recursive=inputs.get("recursive", True),
+            _link_task_ids=inputs.get("link_task_ids", []),
+            **overrides,
+        )
+
+        return {
+            "root_task_id": tree.task.id,
+            "task_count": len(tree.to_list()),
+            "origin_type": "mixed",
+        }
+
+
+class TaskUpdateModule:
+    """Update fields on an existing task."""
+
+    description = (
+        "Update one or more fields on an existing task. Can update name, status, priority, "
+        "inputs, params, error, result, and scheduling fields."
+    )
+
+    def __init__(self, task_repository: Any) -> None:
+        self._repo = task_repository
+        self.input_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string", "minLength": 1},
+                    "name": {"type": "string"},
+                    "status": {
+                        "type": "string",
+                        "enum": ["pending", "in_progress", "completed", "failed", "cancelled"],
+                    },
+                    "priority": {"type": "integer", "minimum": 0, "maximum": 3},
+                    "inputs": {"type": "object"},
+                    "params": {"type": "object"},
+                    "error": {"type": "string"},
+                    "result": {"type": "object"},
+                    "progress": {"type": "number", "minimum": 0, "maximum": 1},
+                },
+                "required": ["task_id"],
+            }
+        )
+        self.output_schema = _make_schema({"type": "object"})
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.pop("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        update_fields = {k: v for k, v in inputs.items() if v is not None}
+        if update_fields:
+            await self._repo.update_task(task_id=task_id, **update_fields)
+
+        task = await self._repo.get_task_by_id(task_id)
+        return task.to_dict()
+
+
+class TaskCancelModule:
+    """Cancel one or more running tasks."""
+
+    description = (
+        "Cancel running tasks by ID. Returns cancellation status for each task. "
+        "Supports partial results and token usage from cancelled executors."
+    )
+
+    def __init__(self, task_manager: Any) -> None:
+        self._manager = task_manager
+        self.input_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "task_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "minItems": 1,
+                        "description": "List of task IDs to cancel",
+                    },
+                    "error_message": {
+                        "type": "string",
+                        "description": "Custom cancellation message",
+                    },
+                },
+                "required": ["task_ids"],
+            }
+        )
+        self.output_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "results": {"type": "array", "items": {"type": "object"}},
+                },
+            }
+        )
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_ids = inputs.get("task_ids", [])
+        if not task_ids:
+            raise ValueError("task_ids must be non-empty")
+
+        error_message = inputs.get("error_message", "Cancelled via API")
+        results = []
+        for tid in task_ids:
+            try:
+                result = await self._manager.cancel_task(tid, error_message=error_message)
+                results.append({"task_id": tid, **result})
+            except Exception as e:
+                results.append({"task_id": tid, "status": "failed", "message": str(e)})
+
+        return {"results": results}
+
+
+class TaskTreeModule:
+    """Get the full tree structure of a task."""
+
+    description = (
+        "Get the complete task tree starting from a root task, including all children "
+        "and their statuses. Returns nested tree structure."
+    )
+
+    def __init__(self, task_repository: Any) -> None:
+        self._repo = task_repository
+        self.input_schema = _make_schema(_TASK_ID_INPUT)
+        self.output_schema = _make_schema({"type": "object"})
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        task = await self._repo.get_task_by_id(task_id)
+        if task is None:
+            raise KeyError(f"Task '{task_id}' not found")
+
+        tree = await self._repo.build_task_tree(task)
+        return tree.output()
+
+
+class TaskChildrenModule:
+    """Get direct children of a task."""
+
+    description = "Get the direct children of a task by parent ID."
+
+    def __init__(self, task_repository: Any) -> None:
+        self._repo = task_repository
+        self.input_schema = _make_schema(_TASK_ID_INPUT)
+        self.output_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {"children": {"type": "array", "items": {"type": "object"}}},
+            }
+        )
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        task_id = inputs.get("task_id", "")
+        if not task_id:
+            raise ValueError("task_id must be non-empty")
+
+        children = await self._repo.get_child_tasks_by_parent_id(task_id)
+        return {
+            "children": [
+                {"id": c.id, "name": c.name, "status": c.status, "priority": c.priority}
+                for c in children
+            ]
+        }
+
+
+class TaskRunningListModule:
+    """List currently running tasks."""
+
+    description = "List all tasks currently in 'in_progress' status."
+
+    def __init__(self, task_repository: Any) -> None:
+        self._repo = task_repository
+        self.input_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "user_id": {"type": "string"},
+                    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
+                },
+            }
+        )
+        self.output_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {"tasks": {"type": "array"}, "count": {"type": "integer"}},
+            }
+        )
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        tasks = await self._repo.query_tasks(
+            status="in_progress",
+            user_id=inputs.get("user_id"),
+            limit=inputs.get("limit", 20),
+        )
+        return {
+            "tasks": [{"id": t.id, "name": t.name, "status": t.status} for t in tasks],
+            "count": len(tasks),
+        }
+
+
+class TaskScheduledListModule:
+    """List scheduled tasks."""
+
+    description = "List tasks that have scheduling configured (cron, interval, etc.)."
+
+    def __init__(self, task_repository: Any) -> None:
+        self._repo = task_repository
+        self.input_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {
+                    "enabled_only": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Only show enabled schedules",
+                    },
+                    "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
+                },
+            }
+        )
+        self.output_schema = _make_schema(
+            {
+                "type": "object",
+                "properties": {"tasks": {"type": "array"}, "count": {"type": "integer"}},
+            }
+        )
+
+    async def execute(self, inputs: dict[str, Any], context: Any = None) -> dict[str, Any]:
+        limit = inputs.get("limit", 20)
+        tasks = await self._repo.query_tasks(limit=limit)
+        # Filter for tasks with scheduling
+        scheduled = [
+            t
+            for t in tasks
+            if getattr(t, "schedule_type", None) is not None
+            and (not inputs.get("enabled_only", True) or getattr(t, "schedule_enabled", False))
+        ]
+        return {
+            "tasks": [
+                {
+                    "id": t.id,
+                    "name": t.name,
+                    "schedule_type": t.schedule_type,
+                    "schedule_expression": t.schedule_expression,
+                    "schedule_enabled": t.schedule_enabled,
+                    "next_run_at": str(t.next_run_at) if t.next_run_at else None,
+                }
+                for t in scheduled
+            ],
+            "count": len(scheduled),
+        }
