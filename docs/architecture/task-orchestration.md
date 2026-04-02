@@ -129,17 +129,33 @@ TaskManager uses **both** priority and dependencies to determine execution order
 4. Cascade: when any task completes, scan for newly-ready waiting tasks
 ```
 
-### Execution Order: Children First, Then Parent
+### Execution Order: Roots First, Fruit Last (Like a Real Tree)
+
+apflow's task tree follows the natural growth of a plant — not an organizational chart:
 
 ```
-      A (priority=2)
+  🍎 Fruit (root task)     ← Last to ripen: aggregates results
+      |
+  🌿 Branches (middle)    ← Process and transform
+      |
+  🌱 Roots (leaf tasks)   ← First to execute: absorb data from sources
+```
+
+```
+      A (priority=2)       ← Fruit: aggregates B and C's results
      / \
-    B   C (priority=1)
-
-Execution: B and C execute first (priority 1) → then A executes (priority 2)
+    B   C (priority=1)     ← Roots: execute first, gather raw data
 ```
 
-This means `parent_id` semantics are **"A is the aggregation point for B and C"**, not "A triggers B and C". The parent is the final step that receives children's results.
+This is the **botanical model** of a tree: roots absorb nutrients first → nutrients flow upward through the trunk → fruit ripens last. In apflow: leaf tasks (data fetching) execute first → results propagate upward → the root task (aggregation/output) executes last.
+
+The tree also serves as an **organizational model**: `parent_id` defines which tasks belong together as a group — enabling copy, link, archive, and mixed operations on entire subtrees.
+
+```
+Botanical aspect:     Execution direction (leaves → root)
+Organizational aspect: Structural grouping (who belongs to whom)
+Execution ordering:    Controlled by DAG (dependencies), not by the tree
+```
 
 ### DAG Patterns
 
@@ -200,15 +216,29 @@ All validation happens at **creation time**, not execution time:
 
 ---
 
-## The Tesla Analogy (Revisited)
+## Two Analogies
+
+### The Plant Analogy (Execution Model)
+
+```
+🍎 Fruit (root task)      = Final output, aggregated result
+🌿 Branches               = Intermediate processing
+🌱 Roots (leaf tasks)     = Data sources, first to execute
+
+Nutrients flow upward: roots absorb → trunk transports → fruit ripens.
+Results flow upward:   leaf tasks execute → results propagate → root aggregates.
+```
+
+apflow's tree is a **botanical tree**, not an org chart. The "root" task in the data model is the **fruit** in the botanical model — it ripens last because it depends on everything below it.
+
+### The Tesla Analogy (System Design)
 
 ```
 Tesla's physical assembly   = apflow's structure tree (parent_id)
-  Which parts belong to which system, how to replace a module,
-  what to ship as a unit.
+  Which parts belong to which system, how to copy/replace a module.
 
 Tesla's CAN bus wiring      = apflow's execution DAG (dependencies)
-  Which systems communicate, signal flow, execution timing.
+  Signal flow, execution timing, which systems communicate.
 
 Tesla's FSD                 = AI agents (Claude, Gemini, any)
   The intelligence that perceives and controls the car.
