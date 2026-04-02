@@ -1,6 +1,9 @@
 # apflow v2 -- Technical Design Document
 
-**Product:** apflow v2 -- AI Agent Production Middleware
+> **Positioning Update:** The product has been repositioned from "AI Agent Production Middleware"
+> to **"AI-Perceivable Distributed Orchestration"** (AP+Flow). See README.md for current positioning.
+
+**Product:** apflow v2 -- AI-Perceivable Distributed Orchestration
 **Version:** 0.20.0 (MVP)
 **Author:** apflow team
 **Date:** 2026-03-28

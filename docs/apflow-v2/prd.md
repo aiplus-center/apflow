@@ -1,6 +1,11 @@
 # apflow v2 — Product Requirements Document
 
-**Product:** apflow v2 — AI Agent Production Middleware
+> **Positioning Update:** The product has been repositioned from "AI Agent Production Middleware"
+> to **"AI-Perceivable Distributed Orchestration"** (AP+Flow). apflow is a distributed task
+> orchestration engine where every capability is AI-perceivable via the apcore module standard.
+> This PRD retains original requirements and analysis. See README.md for current positioning.
+
+**Product:** apflow v2 — AI-Perceivable Distributed Orchestration
 **Version:** 0.20.0 (MVP)
 **Author:** apflow team
 **Date:** 2026-03-28

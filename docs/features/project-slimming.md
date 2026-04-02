@@ -46,7 +46,7 @@ tests/extensions/tools/            # All tools tests
 Step-by-step changes:
 
 1. Update `version` from `"0.18.2"` to `"0.20.0"`.
-2. Update `description` from `"Agent workflow orchestration and execution platform"` to `"AI Agent Production Middleware"`.
+2. Update `description` to `"AI-Perceivable Distributed Orchestration"`.
 3. Update `requires-python` from `">=3.10"` to `">=3.11"`.
 4. Remove from `classifiers`: `"Programming Language :: Python :: 3.10"`.
 5. In `dependencies`, remove: `"duckdb-engine>=0.10.0"`, `"pytz>=2024.1"`.
@@ -76,10 +76,10 @@ Step-by-step changes:
 2. Update module docstring:
    ```python
    """
-   apflow - AI Agent Production Middleware
+   apflow - AI-Perceivable Distributed Orchestration
 
-   Framework-agnostic production middleware that makes AI agents reliable,
-   cost-governed, and auditable.
+   A distributed task orchestration engine where every capability is
+   AI-perceivable via the apcore module standard.
 
    Core modules (always included):
    - core.interfaces: Core interfaces (ExecutableTask, BaseTask)
