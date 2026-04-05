@@ -211,8 +211,8 @@ class TestExtensionScanner:
 
         assert scanner1 is scanner2
 
-    def test_scan_handles_missing_extensions_directory(self) -> None:
-        """Verify scanner handles gracefully when called multiple times."""
+    def test_scan_returns_dict_after_cache_clear(self) -> None:
+        """Verify scan returns a valid dict after cache is cleared."""
         ExtensionScanner.clear_cache()
 
         result = ExtensionScanner.scan_builtin_executors()
