@@ -174,9 +174,7 @@ class AddDurabilityAndGovernance(Migration):
             if col_name in existing_columns:
                 try:
                     with engine.begin() as conn:
-                        conn.execute(
-                            text(f"ALTER TABLE {table_name} DROP COLUMN {col_name}")
-                        )
+                        conn.execute(text(f"ALTER TABLE {table_name} DROP COLUMN {col_name}"))
                     logger.info(f"  Downgrade {self.id}: Dropped column '{col_name}'")
                 except Exception as e:
                     logger.warning(

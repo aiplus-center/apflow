@@ -931,19 +931,6 @@ def configure_database(
     )
 
 
-# Backward compatibility aliases (deprecated)
-def create_storage(*args, **kwargs):
-    """Deprecated: Use create_session instead"""
-    logger.warning("create_storage() is deprecated, use create_session() instead")
-    return create_session(*args, **kwargs)
-
-
-def get_default_storage(*args, **kwargs):
-    """Deprecated: Use get_default_session instead"""
-    logger.warning("get_default_storage() is deprecated, use get_default_session() instead")
-    return get_default_session(*args, **kwargs)
-
-
 class PooledSessionContext:
     """
     Async context manager for pooled database sessions

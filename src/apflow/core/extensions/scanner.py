@@ -289,15 +289,19 @@ class ExtensionScanner:
         parts = file_path.parts
 
         try:
-            # Find the last occurrence of "apflow" in the path to handle nested apflow directories
-            # e.g., /path/to/apflow/src/apflow/extensions/... -> start from the last "apflow"
+            # Find the "apflow" that is the Python package root (right after "src")
+            # e.g., /path/to/apflow/src/apflow/extensions/apflow/... -> use index after "src"
             apflow_indices = [i for i, part in enumerate(parts) if part == "apflow"]
 
             if not apflow_indices:
                 raise ValueError("No 'apflow' in path")
 
-            # Use the last occurrence of "apflow" as the start
+            # Prefer the "apflow" immediately after "src" (standard Python layout)
             apflow_index = apflow_indices[-1]
+            for idx in apflow_indices:
+                if idx > 0 and parts[idx - 1] == "src":
+                    apflow_index = idx
+                    break
 
             module_parts = parts[apflow_index:-1] + (file_path.stem,)
             return ".".join(module_parts)

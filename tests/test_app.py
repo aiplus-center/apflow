@@ -3,7 +3,9 @@
 from click.testing import CliRunner
 
 from apflow.app import ApflowApp, create_app
-from apflow.cli import cli
+from apflow.cli import cli as _get_cli
+
+cli = _get_cli()
 
 
 class TestCreateApp:

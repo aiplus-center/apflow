@@ -16,9 +16,6 @@ from apflow.core.storage.factory import (
     get_session_pool_manager,
     reset_session_pool_manager,
     SessionLimitExceeded,
-    # Backward compatibility (deprecated)
-    create_storage,
-    get_default_storage,
 )
 
 from apflow.core.storage.context import (
@@ -41,7 +38,4 @@ __all__ = [
     # Hook execution context
     "get_hook_session",
     "get_hook_repository",
-    # Backward compatibility (deprecated)
-    "create_storage",
-    "get_default_storage",
 ]

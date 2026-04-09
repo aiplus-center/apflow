@@ -14,16 +14,6 @@ from apflow.logger import get_logger
 logger = get_logger(__name__)
 
 
-# DEPRECATED: EXTENSION_CONFIG is no longer used
-# Extensions are now auto-discovered via ExtensionScanner
-# This is kept for backward compatibility (will be removed in future version)
-EXTENSION_CONFIG: dict[str, dict[str, Any]] = {}
-
-# DEPRECATED: EXECUTOR_ID_TO_EXTENSION is no longer used
-# Use ExtensionScanner.get_executor_metadata() instead
-EXECUTOR_ID_TO_EXTENSION: dict[str, str] = {}
-
-
 def _is_package_installed(package_name: str) -> bool:
     """
     Check if a package is installed WITHOUT importing it (lazy loading safe)

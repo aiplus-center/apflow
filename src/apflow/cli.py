@@ -1,10 +1,12 @@
 """
 apflow CLI entry point.
 
-Provides commands:
+Uses apcore-cli to provide full module discovery and execution CLI,
+plus apflow-specific commands:
   apflow serve   — Start A2A HTTP server
   apflow mcp     — Start MCP server (stdio or HTTP)
   apflow info    — Show version and config info
+  apflow worker  — Start a distributed worker node
 """
 
 import sys
@@ -17,14 +19,40 @@ from apflow.logger import get_logger
 logger = get_logger(__name__)
 
 
-@click.group()
-@click.version_option(package_name="apflow")
-def cli() -> None:
-    """apflow — AI-Perceivable Distributed Orchestration"""
-    pass
+def _build_cli() -> click.Group:
+    """Build the apflow CLI by extending apcore-cli with apflow-specific commands."""
+    from apflow.app import create_app
+
+    app = create_app()
+
+    from apcore_cli import create_cli
+
+    cli = create_cli(
+        registry=app.registry,
+        prog_name="apflow",
+    )
+
+    # Override help text and version for apflow branding
+    cli.help = "apflow — AI-Perceivable Distributed Orchestration"
+
+    from apflow import __version__
+
+    # Replace apcore-cli's version option with apflow's version
+    cli.params = [
+        p for p in cli.params if not (isinstance(p, click.Option) and p.name == "version")
+    ]
+    cli = click.version_option(version=__version__, prog_name="apflow")(cli)
+
+    # Register apflow-specific commands
+    cli.add_command(serve)
+    cli.add_command(mcp)
+    cli.add_command(info)
+    cli.add_command(worker)
+
+    return cli
 
 
-@cli.command()
+@click.command()
 @click.option("--host", default="0.0.0.0", help="Bind host")
 @click.option("--port", default=8000, type=int, help="Bind port")
 @click.option("--name", default="apflow", help="Agent name in A2A Agent Card")
@@ -75,7 +103,7 @@ def serve(
     )
 
 
-@cli.command()
+@click.command()
 @click.option(
     "--transport",
     default="stdio",
@@ -122,7 +150,7 @@ def mcp(
     )
 
 
-@cli.command()
+@click.command()
 def info() -> None:
     """Show apflow version and configuration."""
     from apflow import __version__
@@ -152,7 +180,7 @@ def info() -> None:
         click.echo(f"Registry: error ({e})")
 
 
-@cli.command()
+@click.command()
 @click.option("--db", required=True, help="PostgreSQL connection string (required for cluster)")
 @click.option("--node-id", default=None, help="Worker node ID (auto-generated if omitted)")
 @click.option("--log-level", default=None, help="Log level")
@@ -183,9 +211,21 @@ def worker(db: str, node_id: Optional[str], log_level: Optional[str]) -> None:
         click.echo("Worker stopped")
 
 
+# Lazily built Click group for use by tests (via CliRunner) and entry point.
+_cli_instance: click.Group | None = None
+
+
+def cli() -> click.Group:
+    """Get the apflow CLI group (built once, cached)."""
+    global _cli_instance
+    if _cli_instance is None:
+        _cli_instance = _build_cli()
+    return _cli_instance
+
+
 def main() -> None:
     """Entry point for apflow CLI."""
-    cli()
+    cli()(standalone_mode=True)
 
 
 if __name__ == "__main__":

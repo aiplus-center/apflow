@@ -16,6 +16,10 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 - **Dependencies removed**: duckdb-engine, pytz, fastapi, uvicorn, a2a-sdk, rich, typer, crewai, litellm, anthropic, strawberry-graphql, grpclib, protobuf, beautifulsoup4, trafilatura
 - **Entry points removed**: `apflow-server` command (replaced by `apflow serve`)
 - **25+ stale v1 documentation files**
+- **Deprecated backward-compatibility aliases**: `create_storage()` and `get_default_storage()` removed from `core/storage/factory.py` and `core/storage/__init__.py` — use `create_session()` and `get_default_session()` instead
+- **Deprecated logger shim**: `apflow.core.utils.logger` module deleted — use `from apflow.logger import get_logger` directly
+- **Deprecated extension constants**: `EXTENSION_CONFIG` and `EXECUTOR_ID_TO_EXTENSION` removed from `core/extensions/manager.py` — extensions are auto-discovered via `ExtensionScanner`
+- **Test backward-compatibility aliases**: `create_storage` / `get_default_storage` aliases removed from `tests/conftest.py`
 
 ### Added
 

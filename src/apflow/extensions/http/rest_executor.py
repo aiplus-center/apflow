@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 import httpx
 from typing import Any, ClassVar, Dict, Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from apflow.core.base import BaseTask
 from apflow.core.extensions.decorators import executor_register
 from apflow.core.execution.errors import ValidationError, NetworkError
@@ -34,6 +34,8 @@ class RestAuthConfig(BaseModel):
 
 
 class RestInputSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     url: str = Field(description="Target URL for the HTTP request")
     method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"] = Field(
         default="GET", description="HTTP method (default: GET)"
@@ -45,7 +47,9 @@ class RestInputSchema(BaseModel):
     params: Optional[Dict[str, Any]] = Field(
         default=None, description="Query parameters as key-value pairs"
     )
-    json: Optional[Dict[str, Any]] = Field(default=None, description="JSON request body")
+    json_body: Optional[Dict[str, Any]] = Field(
+        default=None, alias="json", description="JSON request body"
+    )
     data: Optional[Dict[str, Any]] = Field(default=None, description="Form data as key-value pairs")
     auth: Optional[RestAuthConfig] = Field(default=None, description="Authentication configuration")
     timeout: float = Field(default=30.0, description="Request timeout in seconds (default: 30.0)")
@@ -55,13 +59,15 @@ class RestInputSchema(BaseModel):
 
 
 class RestOutputSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     success: bool = Field(description="Whether the request was successful")
     status_code: Optional[int] = Field(default=None, description="HTTP status code")
     url: Optional[str] = Field(default=None, description="Final URL after redirects")
     headers: Optional[Dict[str, Any]] = Field(default=None, description="Response headers")
     method: str = Field(description="HTTP method used")
-    json: Optional[Dict[str, Any]] = Field(
-        default=None, description="JSON response body (if applicable)"
+    json_body: Optional[Dict[str, Any]] = Field(
+        default=None, alias="json", description="JSON response body (if applicable)"
     )
     text: Optional[str] = Field(default=None, description="Text response body (if applicable)")
     error: Optional[str] = Field(default=None, description="Error message (if applicable)")

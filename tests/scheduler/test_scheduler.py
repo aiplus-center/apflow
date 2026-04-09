@@ -1053,5 +1053,3 @@ class TestSchedulerAPIDetection:
         """_use_api defaults to False before start."""
         scheduler = InternalScheduler()
         assert scheduler._use_api is False
-
-

@@ -1148,7 +1148,9 @@ class TestSchedulingRepositoryMethods:
         assert updated.run_count == 1
         assert updated.last_run_at is not None
         assert updated.next_run_at is not None
-        assert updated.next_run_at.replace(tzinfo=None) > now.replace(tzinfo=None)  # Next run should be in the future
+        assert updated.next_run_at.replace(tzinfo=None) > now.replace(
+            tzinfo=None
+        )  # Next run should be in the future
         assert updated.status == "completed"  # Preserved from executor
         assert updated.result == {"processed": 100}  # Preserved from executor
 

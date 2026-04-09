@@ -77,8 +77,6 @@ from sqlalchemy.ext.asyncio import (  # noqa: E402
 )
 from apflow.core.storage.sqlalchemy.models import Base, TASK_TABLE_NAME  # noqa: E402
 from apflow.core.storage.factory import (  # noqa: E402
-    create_session,
-    get_default_session,
     reset_default_session,
     set_default_session,
     is_postgresql_url,
@@ -87,10 +85,6 @@ from apflow.core.storage.factory import (  # noqa: E402
 from apflow.logger import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
-
-# Backward compatibility aliases
-create_storage = create_session
-get_default_storage = get_default_session
 
 
 # Custom pytest markers
