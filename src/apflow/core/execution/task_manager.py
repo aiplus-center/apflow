@@ -957,11 +957,27 @@ class TaskManager:
             if self.stream:
                 self.streaming_callbacks.task_completed(task_id, result=task.result)
 
-        # Trigger dependent tasks and execute post-hooks
-        try:
-            await self.execute_after_task(task)
-        except Exception as e:
-            logger.error(f"Error triggering dependent tasks for {task_id}: {str(e)}")
+        # Trigger dependent tasks and execute post-hooks.
+        # Retry on failure to prevent permanently orphaned parent tasks when
+        # this is the last child to complete (no future callback will re-check).
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                await self.execute_after_task(task)
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = 0.1 * (2**attempt)  # 0.1s, 0.2s
+                    logger.warning(
+                        f"execute_after_task failed for {task_id} "
+                        f"(attempt {attempt + 1}/{max_retries}), retrying in {delay}s: {e}"
+                    )
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(
+                        f"execute_after_task failed for {task_id} after {max_retries} attempts: {e}",
+                        exc_info=True,
+                    )
 
     async def _are_dependencies_satisfied(self, task: TaskModelType) -> bool:
         """
@@ -1000,25 +1016,31 @@ class TaskManager:
         task_id = self._get_safe_task_id(task)
 
         try:
-            # Check pre-execution conditions
+            # Check pre-execution conditions (streaming final, basic status)
             if not await self._check_task_execution_preconditions(task, task_id):
                 return
 
-            # Refresh task and update status
+            # Refresh task and check cancellation
             task = await self._check_cancellation_and_refresh_task(task_id)
             if not task:
                 return
 
+            # Atomically claim task for execution (compare-and-swap).
+            # Determines which statuses are claimable based on re-execution context.
+            allowed_statuses = ["pending"]
+            if task_id in self._tasks_to_reexecute:
+                allowed_statuses.extend(["completed", "cancelled", "failed"])
+            claimed_task = await self.task_repository.try_claim_for_execution(
+                task_id, allowed_statuses=allowed_statuses
+            )
+            if claimed_task is None:
+                logger.info(f"Task {task_id} already claimed by another caller, skipping")
+                return
+            task = claimed_task
+
+            # Emit task_start only after successful claim to avoid false events
             if self.stream:
                 self.streaming_callbacks.task_start(task_id)
-
-            # Update status to in_progress
-            await self.task_repository.update_task(
-                task_id=task_id,
-                status="in_progress",
-                error=None,
-                started_at=datetime.now(timezone.utc),
-            )
 
             logger.info(f"Task {task_id} status updated to in_progress")
 
@@ -1330,10 +1352,19 @@ class TaskManager:
 
     async def execute_after_task(self, completed_task: TaskModelType):
         """
-        Execute after task completion - execute post-hooks and trigger dependent tasks
+        Execute after task completion - execute post-hooks and trigger dependent tasks.
+
+        Exceptions from post-hooks are isolated (logged but swallowed) so they
+        never prevent dependent task triggering.  Exceptions from the dependency
+        check / trigger phase are allowed to propagate so the caller's retry
+        loop in ``_handle_task_execution_result`` can re-attempt the operation.
 
         Args:
             completed_task: Task that just completed
+
+        Raises:
+            Exception: If the dependency check or dependent task triggering
+                fails.  Post-hook errors are logged but never raised.
 
         Note:
             Post-hooks are executed FIRST (before triggering dependent tasks) to ensure
@@ -1345,13 +1376,12 @@ class TaskManager:
             If you need dependent task results in post-hooks, handle it in the
             dependent task's own post-hooks instead.
         """
-        try:
-            # Check if task is actually completed
-            if completed_task.status != "completed":
-                return
+        # Check if task is actually completed
+        if completed_task.status != "completed":
+            return
 
-            # Execute post-hooks FIRST (before triggering dependent tasks)
-            # This ensures immediate response and doesn't wait for dependent tasks
+        # --- Phase 1: Post-hooks (errors isolated, never block Phase 2) ---
+        try:
             # Refresh session state before query to ensure we see latest database state
             # This prevents blocking in sync sessions when there are uncommitted transactions
             if not self.is_async:
@@ -1390,71 +1420,80 @@ class TaskManager:
                 logger.warning(
                     f"Task {completed_task.id} not found or not completed, skipping post-hooks"
                 )
-
-            logger.info(
-                f"🔍 Checking for dependent tasks after completion of {completed_task.id} (name: {completed_task.name})"
+        except Exception as e:
+            # Post-hook failures must not prevent dependent task triggering
+            logger.error(
+                f"Post-hook phase failed for {completed_task.id}: {str(e)}",
+                exc_info=True,
             )
 
-            # Get all tasks in the tree
-            root_task = await self._get_root_task(completed_task)
-            all_tasks = await self._get_all_tasks_in_tree(root_task)
+        # --- Phase 2: Dependency check & trigger (errors propagate for retry) ---
+        logger.info(
+            f"🔍 Checking for dependent tasks after completion of {completed_task.id} (name: {completed_task.name})"
+        )
 
-            # Find tasks that are waiting and might have their dependencies satisfied
-            waiting_tasks = [
-                t
-                for t in all_tasks
-                if t.status in ["pending", "in_progress"] and t.id != completed_task.id
-            ]
+        # Expire cached ORM state so the tree query sees the latest
+        # committed data from other coroutines (e.g. sibling tasks that
+        # completed concurrently via asyncio.gather).
+        if not self.is_async:
+            self.db.expire_all()
 
-            # Trigger dependent tasks if any
-            if waiting_tasks:
-                logger.info(f"Found {len(waiting_tasks)} waiting tasks to check for dependencies")
+        # Get all tasks in the tree
+        root_task = await self._get_root_task(completed_task)
+        all_tasks = await self._get_all_tasks_in_tree(root_task)
 
-                # Check each waiting task to see if its dependencies are now satisfied
-                triggered_tasks = []
-                for task in waiting_tasks:
-                    logger.debug(f"Checking dependencies for task {task.id} (name: {task.name})")
-                    deps_satisfied = await are_dependencies_satisfied(
-                        task, self.task_repository, self._tasks_to_reexecute
+        # Find tasks that are waiting and might have their dependencies satisfied
+        waiting_tasks = [
+            t
+            for t in all_tasks
+            if t.status in ["pending", "in_progress"] and t.id != completed_task.id
+        ]
+
+        # Trigger dependent tasks if any
+        if waiting_tasks:
+            logger.info(f"Found {len(waiting_tasks)} waiting tasks to check for dependencies")
+
+            # Check each waiting task to see if its dependencies are now satisfied
+            triggered_tasks = []
+            for task in waiting_tasks:
+                logger.debug(f"Checking dependencies for task {task.id} (name: {task.name})")
+                deps_satisfied = await are_dependencies_satisfied(
+                    task, self.task_repository, self._tasks_to_reexecute
+                )
+
+                if deps_satisfied:
+                    logger.info(
+                        f"🚀 Task {task.id} (name: {task.name}) dependencies now satisfied, executing"
+                    )
+                    triggered_tasks.append(task)
+                    try:
+                        await self._execute_single_task(task, use_callback=True)
+                    except Exception as e:
+                        # Log business errors without stack trace, unexpected errors with stack trace
+                        if isinstance(e, BusinessError):
+                            logger.error(
+                                f"❌ Business error executing dependent task {task.id}: {str(e)}"
+                            )
+                        else:
+                            logger.error(
+                                f"❌ Failed to execute dependent task {task.id}: {str(e)}",
+                                exc_info=True,
+                            )
+                        # Update task status using repository
+                        await self.task_repository.update_task(
+                            task_id=task.id, status="failed", error=str(e)
+                        )
+                else:
+                    logger.debug(
+                        f"Task {task.id} (name: {task.name}) dependencies not yet satisfied"
                     )
 
-                    if deps_satisfied:
-                        logger.info(
-                            f"🚀 Task {task.id} (name: {task.name}) dependencies now satisfied, executing"
-                        )
-                        triggered_tasks.append(task)
-                        try:
-                            await self._execute_single_task(task, use_callback=True)
-                        except Exception as e:
-                            # Log business errors without stack trace, unexpected errors with stack trace
-                            if isinstance(e, BusinessError):
-                                logger.error(
-                                    f"❌ Business error executing dependent task {task.id}: {str(e)}"
-                                )
-                            else:
-                                logger.error(
-                                    f"❌ Failed to execute dependent task {task.id}: {str(e)}",
-                                    exc_info=True,
-                                )
-                            # Update task status using repository
-                            await self.task_repository.update_task(
-                                task_id=task.id, status="failed", error=str(e)
-                            )
-                    else:
-                        logger.debug(
-                            f"Task {task.id} (name: {task.name}) dependencies not yet satisfied"
-                        )
-
-                if triggered_tasks:
-                    logger.info(f"Successfully triggered {len(triggered_tasks)} dependent tasks")
-                else:
-                    logger.debug("No tasks were triggered by this completion")
+            if triggered_tasks:
+                logger.info(f"Successfully triggered {len(triggered_tasks)} dependent tasks")
             else:
-                logger.debug("No waiting tasks found")
-        except Exception as e:
-            logger.error(
-                f"Error in execute_after_task for {completed_task.id}: {str(e)}", exc_info=True
-            )
+                logger.debug("No tasks were triggered by this completion")
+        else:
+            logger.debug("No waiting tasks found")
 
     def _get_executor_id(self, task: TaskModelType) -> Optional[str]:
         """

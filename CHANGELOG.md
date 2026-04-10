@@ -70,6 +70,15 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
   - Type coercion for int/float/bool/list from env strings
   - `get(key, default)` interface for future apcore Config migration
 
+### Fixed
+
+- **Concurrent child completion race conditions** (`core/execution/task_manager.py`, `core/storage/sqlalchemy/task_repository.py`)
+  - **TOCTOU double-trigger**: When multiple child tasks completed concurrently via `asyncio.gather`, two coroutines could both pass the `in_progress` status check and execute the parent task twice. Fixed by replacing the non-atomic check-then-set with `TaskRepository.try_claim_for_execution()` — a conditional `UPDATE ... WHERE status IN (...)` that guarantees exactly one caller wins the claim.
+  - **Orphaned parent on exception**: If `execute_after_task` threw an exception for the last completing child (e.g. transient DB error), the parent task would be permanently stuck in `pending` with no future callback to re-check. Fixed by adding a 3-attempt retry with exponential backoff (0.1s, 0.2s) around `execute_after_task` in `_handle_task_execution_result`.
+  - **Retry was dead code**: The broad `try/except` inside `execute_after_task` swallowed all exceptions, making the caller's retry loop ineffective. Fixed by splitting `execute_after_task` into two phases: Phase 1 (post-hooks) isolates errors internally; Phase 2 (dependency check & trigger) lets exceptions propagate for retry.
+  - **Stale ORM cache**: Added `expire_all()` before the dependency tree query in `execute_after_task` so concurrent coroutines see the latest committed child statuses.
+  - **False streaming event**: Moved `task_start` callback to fire after successful atomic claim, preventing false "task started" events when the claim is rejected.
+
 ### Changed
 
 - **Version**: 0.18.2 → 0.20.0

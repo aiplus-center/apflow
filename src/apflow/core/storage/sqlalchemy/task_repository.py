@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from typing import List, Dict, Any, Optional, Union, TYPE_CHECKING, Type, Set
 from apflow.core.storage.sqlalchemy.models import TaskModel, TaskOriginType, TaskModelType
 from apflow.core.execution.errors import ValidationError
@@ -411,6 +411,61 @@ class TaskRepository:
 
         except Exception as e:
             logger.error(f"Error updating task {task_id}: {str(e)}")
+            await self.db.rollback()
+            raise
+
+    async def try_claim_for_execution(
+        self, task_id: str, allowed_statuses: Optional[List[str]] = None
+    ) -> Optional[TaskModelType]:
+        """
+        Atomically transition a task from an allowed status to in_progress.
+
+        Uses a conditional UPDATE (compare-and-swap) to prevent TOCTOU races:
+        only one caller succeeds when multiple coroutines or workers try to
+        claim the same task concurrently.
+
+        Args:
+            task_id: Task ID to claim
+            allowed_statuses: Statuses from which transition is allowed.
+                Defaults to ["pending"] if not specified.
+
+        Returns:
+            The refreshed task if the claim succeeded, None if another caller
+            already transitioned the task (0 rows matched).
+        """
+        if allowed_statuses is None:
+            allowed_statuses = ["pending"]
+
+        try:
+            from datetime import timezone as tz
+
+            now = datetime.now(tz.utc)
+            stmt = (
+                update(self.task_model_class)
+                .where(
+                    self.task_model_class.id == task_id,
+                    self.task_model_class.status.in_(allowed_statuses),
+                )
+                .values(status="in_progress", started_at=now, error=None)
+            )
+            result = await self.db.execute(stmt)
+            await self.db.commit()
+
+            rows_affected = result.rowcount  # type: ignore[union-attr]
+            if rows_affected == 0:
+                logger.info(
+                    f"Task {task_id} claim failed: status not in {allowed_statuses} "
+                    f"(already claimed by another caller)"
+                )
+                return None
+
+            # Re-fetch the task to return a fully loaded ORM instance
+            task = await self.get_task_by_id(task_id)
+            logger.info(f"Task {task_id} claimed for execution (status → in_progress)")
+            return task
+
+        except Exception as e:
+            logger.error(f"Error claiming task {task_id}: {str(e)}")
             await self.db.rollback()
             raise
 
