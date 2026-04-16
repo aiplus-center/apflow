@@ -121,7 +121,7 @@ class TestTaskTreeHooks:
             name="test_task",
             user_id="test_user",
             inputs={"test": "data"},
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
         )
 
         task_tree = TaskTreeNode(root_task)

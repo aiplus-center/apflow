@@ -1,13 +1,21 @@
 # Changelog
 
-## [0.20.0] - 2026-03-28
+
+## [0.20.0] - 2026-04-16
 
 ### BREAKING CHANGES — Product Repositioning
 
 apflow v2 is repositioned from "task orchestration framework" to **AI Agent Production Middleware**. This is a major rewrite. The v1 codebase is preserved on the `v1-task-orchestration` branch.
 
-### Removed (~17,500 lines deleted)
+### Removed
 
+Stripped down to 4 core executors. The remaining executors are examples; real executors are AI agents, business logic, or any `ExecutableTask` implementation.
+
+- **Kept**: `RestExecutor`, `SendEmailExecutor`, `AggregateResultsExecutor`, `ApFlowApiExecutor`
+- **Deleted**: `SshExecutor`, `DockerExecutor`, `ScrapeExecutor`, `WebSocketExecutor`, `McpExecutor`, `CommandExecutor`, `SystemInfoExecutor` (the latter two lived in `extensions/stdio/`)
+- **Deleted**: `core/tools/` framework (`BaseTool`, `ToolRegistry` — dead code, no consumers)
+- **Deleted**: `extensions/llm_key_config/` — dead code, no importers
+- **Removed extras** from `pyproject.toml`: `ssh`, `docker`
 - **Self-built protocol layers**: `api/a2a/`, `api/mcp/`, `api/graphql/`, `api/docs/`, `api/routes/` — replaced by apcore ecosystem
 - **CLI**: `cli/` — replaced by apcore-cli
 - **AI framework wrappers**: `extensions/crewai/`, `extensions/llm/`, `extensions/generate/` — out of scope for middleware
@@ -22,7 +30,13 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 - **Test backward-compatibility aliases**: `create_storage` / `get_default_storage` aliases removed from `tests/conftest.py`
 
 ### Added
-
+- `@function_executor` decorator for lightweight executor registration (2642b04)
+- Atomic compare-and-swap task claiming to prevent concurrency races (ce845d5)
+- Restored 7 task lifecycle tools (link/copy/archive) exposed via MCP/A2A/CLI (5ab65a9, 171199f)
+- Expanded `ExtensionScanner` test suite (a1519b8, bfea353)
+- `task.create_tree` MCP tool — AI agents create entire task trees in a single call (a20f226)
+- Distributed wiring in CLI — `apflow serve --cluster`, `apflow worker` (a20f226)
+- End-to-end example `examples/quickstart.py` — register → create tree → execute → get results (a20f226)
 - **apcore Module Bridge** (`bridge/`)
   - `ExecutableTaskModuleAdapter`: wraps any executor as apcore Module
   - `discover_executor_modules()`: auto-discovers executors via AST scanner
@@ -78,6 +92,9 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
   - **Retry was dead code**: The broad `try/except` inside `execute_after_task` swallowed all exceptions, making the caller's retry loop ineffective. Fixed by splitting `execute_after_task` into two phases: Phase 1 (post-hooks) isolates errors internally; Phase 2 (dependency check & trigger) lets exceptions propagate for retry.
   - **Stale ORM cache**: Added `expire_all()` before the dependency tree query in `execute_after_task` so concurrent coroutines see the latest committed child statuses.
   - **False streaming event**: Moved `task_start` callback to fire after successful atomic claim, preventing false "task started" events when the claim is rejected.
+  - Type annotations: replace `Any` with typed imports across `app.py` and `task_manager.py` (Session, TaskManager, CheckpointManager, RetryManager, CircuitBreakerRegistry, BudgetManager, PolicyEngine) (8ee5040)
+- `cli.py` stale positioning string corrected (8ee5040)
+- `ExecutableTask` docstring updated to list the current 4 executors and mention `@function_executor` (8ee5040)
 
 ### Changed
 
@@ -88,6 +105,10 @@ apflow v2 is repositioned from "task orchestration framework" to **AI Agent Prod
 - **TaskCreator**: relaxed single-root constraint, allows multi-root task forests
 - **README.md**: completely rewritten for v2
 - **CLAUDE.md**: updated with v2 architecture overview
+- Documentation restored for v2: Task Orchestration Architecture, Plant Analogy, dual-model (Structure Tree + Execution DAG)
+- CLAUDE.md repositioned: apflow is **AI-perceivable**, not "NOT an AI product"
+- Architecture diagrams corrected: apcore is embedded, not a middle layer
+- Removed deprecated backward-compatibility aliases and stale code: `create_storage`/`get_default_storage` aliases, `apflow.core.utils.logger` shim, `EXTENSION_CONFIG`/`EXECUTOR_ID_TO_EXTENSION` constants (8316642)
 
 ---
 

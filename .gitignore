@@ -43,6 +43,9 @@ htmlcov/
 # Documentation
 docs/_build/
 site/
+# Generated at build time from README.md (see .github/workflows/docs.yml)
+docs/index.md
+docs/assets/apflow-logo.svg
 
 # Database
 *.db

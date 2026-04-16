@@ -22,7 +22,7 @@ apflow does not implement AI intelligence — it implements deterministic, relia
 - **governance/**: Token budget management, cost policy engine, model downgrade chains
 - **core/storage/**: SQLite (default) / PostgreSQL, SQLAlchemy ORM
 - **core/distributed/**: Leader election, task leasing, worker management
-- **extensions/**: Core executors (REST, AggregateResults, ApflowApi, Email)
+- **extensions/**: Core executors (REST, AggregateResults, ApFlowApi, Email)
 - **app.py**: Bootstrap factory — `create_app()` initializes full stack
 - **cli.py**: Entry points — `apflow serve`, `apflow mcp`, `apflow info`
 

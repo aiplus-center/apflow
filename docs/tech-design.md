@@ -113,7 +113,7 @@ C4Container
         Container(governance, "Cost Governance", "Python", "Budget tracking, policy enforcement, provider routing")
         Container(durability, "Durable Execution", "Python", "Checkpoint/resume, retry, circuit breaker")
         Container(engine, "Task Engine", "Python", "TaskManager, TaskCreator, TaskExecutor, dependency graph")
-        Container(executors, "Executors", "Python", "REST, SSH, Docker, Email, Scrape, WebSocket, MCP, Command")
+        Container(executors, "Executors", "Python", "REST, Email, AggregateResults, ApflowApi")
         Container(storage, "Storage Layer", "Python/SQLAlchemy", "TaskRepository, models, migrations, dialect registry")
     }
 
@@ -160,7 +160,7 @@ Layer 2: apflow v2 (THIS PRODUCT)
   | Task Orchestration Engine                                 |
   | TaskManager | TaskCreator | TaskExecutor                  |
   +-----------------------------------------------------------+
-  | Executors (REST, SSH, Docker, Email, Scrape, WS, MCP, Cmd)|
+  | Executors (REST, Email, AggregateResults, ApflowApi)       |
   +-----------------------------------------------------------+
   | Storage (SQLite / PostgreSQL via SQLAlchemy dialects)      |
   +-----------------------------------------------------------+
@@ -246,7 +246,7 @@ sequenceDiagram
 
     Note over Bridge,Scanner: Startup sequence
     Bridge->>Scanner: scan_builtin_executors()
-    Scanner-->>Bridge: [RestExecutor, SSHExecutor, DockerExecutor, ...]
+    Scanner-->>Bridge: [RestExecutor, SendEmailExecutor, AggregateResultsExecutor, ApFlowApiExecutor]
     loop For each executor
         Bridge->>Reg: registry.register(module_adapter(executor))
     end
@@ -547,8 +547,6 @@ postgres = [
 # Executor-specific extras (preserved)
 scheduling = ["croniter>=1.0.0"]
 email = ["aiosmtplib>=3.0.0"]
-ssh = ["asyncssh>=2.14.0"]
-docker = ["docker>=7.0.0"]
 
 # Documentation
 docs = [
@@ -2972,13 +2970,9 @@ Each registered module exposes the following to apcore-mcp, apcore-a2a, and apco
 | Module Name | Type | Input Schema Summary | Output Schema Summary |
 |---|---|---|---|
 | `apflow.rest_executor` | Executor | `{url, method, headers, body, timeout}` | `{status_code, response_body, headers}` |
-| `apflow.ssh_executor` | Executor | `{host, port, username, command, key_file}` | `{stdout, stderr, exit_code}` |
-| `apflow.docker_executor` | Executor | `{image, command, env, volumes}` | `{stdout, stderr, exit_code, container_id}` |
-| `apflow.email_executor` | Executor | `{to, subject, body, from, smtp_config}` | `{sent, message_id}` |
-| `apflow.scrape_executor` | Executor | `{url, selector, format}` | `{content, metadata}` |
-| `apflow.websocket_executor` | Executor | `{url, message, headers}` | `{response, connected}` |
-| `apflow.mcp_executor` | Executor | `{server_command, tool_name, arguments}` | `{result, tool_output}` |
-| `apflow.command_executor` | Executor | `{command, args, cwd, env, timeout}` | `{stdout, stderr, exit_code}` |
+| `apflow.send_email_executor` | Executor | `{to, subject, body, from, smtp_config}` | `{sent, message_id}` |
+| `apflow.aggregate_results_executor` | Executor | `{source_task_ids, strategy}` | `{aggregated_result}` |
+| `apflow.apflow_api_executor` | Executor | `{endpoint, payload}` | `{response}` |
 | `apflow.task.create` | Task Mgmt | `{name, inputs, params, priority, ...}` | `{id, name, status, created_at}` |
 | `apflow.task.execute` | Task Mgmt | `{task_id}` | `{task_id, status, result, token_usage}` |
 | `apflow.task.list` | Task Mgmt | `{status, user_id, limit, offset}` | `{tasks[], total}` |

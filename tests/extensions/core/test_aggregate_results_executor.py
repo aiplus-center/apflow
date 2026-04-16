@@ -5,6 +5,7 @@ Tests the aggregate_results_executor functionality in isolation and with real ex
 """
 
 import pytest
+from apflow.adapters.function_executor import function_executor
 from apflow.extensions.core.aggregate_results_executor import AggregateResultsExecutor
 
 
@@ -156,89 +157,58 @@ class TestAggregateResultsExecutor:
         assert "core" in executor.tags
 
     @pytest.mark.asyncio
-    async def test_execute_with_real_system_info_executor(self, executor):
+    async def test_execute_with_real_function_executor(self, executor):
         """
-        Integration test: Use real system_info_executor to get actual system data,
-        then aggregate the results using aggregate_results_executor.
-
-        This test demonstrates the real-world usage pattern:
-        1. Execute system_info_executor for different resources (CPU, memory, disk)
-        2. Simulate TaskManager merging results into inputs (as it would in production)
-        3. Use aggregate_results_executor to aggregate all results
+        Integration test: run three real function-based executors, then aggregate their
+        outputs via AggregateResultsExecutor. Verifies the dependency-merge contract
+        (executor output -> merged into inputs keyed by task id -> aggregator filters
+        pre-hook markers and collates the real results).
         """
-        # Import system_info_executor
-        try:
-            from apflow.extensions.stdio import SystemInfoExecutor
-        except ImportError:
-            pytest.skip("SystemInfoExecutor not available")
 
-        # Step 1: Execute system_info_executor for different resources
-        cpu_executor = SystemInfoExecutor()
-        memory_executor = SystemInfoExecutor()
-        disk_executor = SystemInfoExecutor()
+        @function_executor(
+            id="fe_cpu_probe",
+            description="Return a fake CPU snapshot for aggregation tests",
+            override=True,
+        )
+        async def cpu_probe(_inputs: dict) -> dict:
+            return {"system": "Darwin", "cores": 8}
 
-        # Get real system information
-        cpu_result = await cpu_executor.execute({"resource": "cpu"})
-        memory_result = await memory_executor.execute({"resource": "memory"})
-        disk_result = await disk_executor.execute({"resource": "disk"})
+        @function_executor(
+            id="fe_memory_probe",
+            description="Return a fake memory snapshot for aggregation tests",
+            override=True,
+        )
+        async def memory_probe(_inputs: dict) -> dict:
+            return {"total_gb": 64.0}
 
-        # Verify we got real results
-        assert cpu_result is not None
-        assert memory_result is not None
-        assert disk_result is not None
+        @function_executor(
+            id="fe_disk_probe",
+            description="Return a fake disk snapshot for aggregation tests",
+            override=True,
+        )
+        async def disk_probe(_inputs: dict) -> dict:
+            return {"total": "926Gi", "available": "319Gi"}
 
-        # Step 2: Simulate TaskManager's resolve_task_dependencies() behavior
-        # In production, TaskManager would merge these results into inputs like this:
+        cpu_result = await cpu_probe({})
+        memory_result = await memory_probe({})
+        disk_result = await disk_probe({})
+
+        # TaskManager would merge dependency results into the aggregator's inputs
+        # keyed by upstream task id, alongside internal pre-hook markers.
         inputs = {
-            "cpu-info": cpu_result,  # Dependency result from cpu-info task
-            "memory-info": memory_result,  # Dependency result from memory-info task
-            "disk-info": disk_result,  # Dependency result from disk-info task
-            # Pre-hook markers are filtered out (internal implementation details)
+            "cpu-info": cpu_result,
+            "memory-info": memory_result,
+            "disk-info": disk_result,
             "_pre_hook_executed": True,
-            "_pre_hook_timestamp": "2024-01-01T00:00:00Z",
+            "_pre_hook_timestamp": "2026-04-16T00:00:00Z",
         }
 
-        # Step 3: Use aggregate_results_executor to aggregate the real results
-        aggregated_result = await executor.execute(inputs)
+        aggregated = await executor.execute(inputs)
 
-        # Verify aggregated result structure
-        assert aggregated_result is not None
-        assert "summary" in aggregated_result
-        assert "timestamp" in aggregated_result
-        assert "results" in aggregated_result
-        assert "result_count" in aggregated_result
+        assert aggregated["result_count"] == 3
+        assert aggregated["results"]["cpu-info"] == cpu_result
+        assert aggregated["results"]["memory-info"] == memory_result
+        assert aggregated["results"]["disk-info"] == disk_result
+        assert "_pre_hook_executed" not in aggregated["results"]
+        assert "_pre_hook_timestamp" not in aggregated["results"]
 
-        # Verify we aggregated only dependency results (pre-hook markers filtered)
-        assert aggregated_result["result_count"] == 3
-        assert "cpu-info" in aggregated_result["results"]
-        assert "memory-info" in aggregated_result["results"]
-        assert "disk-info" in aggregated_result["results"]
-        # Pre-hook markers are filtered out (internal implementation details)
-        assert "_pre_hook_executed" not in aggregated_result["results"]
-        assert "_pre_hook_timestamp" not in aggregated_result["results"]
-
-        # Verify real system data is preserved in aggregated results
-        cpu_aggregated = aggregated_result["results"]["cpu-info"]
-        memory_aggregated = aggregated_result["results"]["memory-info"]
-        disk_aggregated = aggregated_result["results"]["disk-info"]
-
-        # CPU result should have system info
-        assert isinstance(cpu_aggregated, dict)
-        assert "system" in cpu_aggregated or "cores" in cpu_aggregated or "brand" in cpu_aggregated
-
-        # Memory result should have memory info
-        assert isinstance(memory_aggregated, dict)
-        assert "total_gb" in memory_aggregated or "system" in memory_aggregated
-
-        # Disk result should have disk info
-        assert isinstance(disk_aggregated, dict)
-        assert (
-            "total" in disk_aggregated
-            or "available" in disk_aggregated
-            or "system" in disk_aggregated
-        )
-
-        # Verify the aggregated results match the original results
-        assert cpu_aggregated == cpu_result
-        assert memory_aggregated == memory_result
-        assert disk_aggregated == disk_result

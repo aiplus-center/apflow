@@ -115,7 +115,7 @@ class TestTaskExecutorAdditional:
         task = await repo.create_task(
             name="cancel-test",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
         )
 
         executor = TaskExecutor()
@@ -136,7 +136,7 @@ class TestTaskExecutorAdditional:
                 "id": "exec-test-task",
                 "name": "Execute Test",
                 "user_id": "test-user",
-                "schemas": {"method": "system_info_executor"},
+                "schemas": {"method": "rest_executor"},
                 "inputs": {"resource": "cpu"},
             }
         ]
@@ -174,7 +174,7 @@ class TestTaskExecutorAdditional:
         task = await repo.create_task(
             name="exec-by-id-test",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
 
@@ -281,7 +281,7 @@ class TestTaskExecutorRequireExisting:
         task = await repo.create_task(
             name="existing-task",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
 
@@ -305,7 +305,7 @@ class TestTaskExecutorRequireExisting:
                 "id": "parent-task",
                 "name": "Parent Task",
                 "user_id": "test-user",
-                "schemas": {"method": "system_info_executor"},
+                "schemas": {"method": "rest_executor"},
                 "inputs": {"resource": "cpu"},
             },
             {
@@ -313,7 +313,7 @@ class TestTaskExecutorRequireExisting:
                 "name": "Child Task",
                 "user_id": "test-user",
                 "parent_id": "parent-task",
-                "schemas": {"method": "system_info_executor"},
+                "schemas": {"method": "rest_executor"},
                 "inputs": {"resource": "memory"},
             },
         ]
@@ -335,7 +335,7 @@ class TestTaskExecutorRequireExisting:
                 "id": "main-task",
                 "name": "Main Task",
                 "user_id": "test-user",
-                "schemas": {"method": "system_info_executor"},
+                "schemas": {"method": "rest_executor"},
                 "inputs": {"resource": "memory"},
             },
             {
@@ -343,7 +343,7 @@ class TestTaskExecutorRequireExisting:
                 "name": "Dependency Task",
                 "user_id": "test-user",
                 "parent_id": "main-task",
-                "schemas": {"method": "system_info_executor"},
+                "schemas": {"method": "rest_executor"},
                 "inputs": {"resource": "cpu"},
                 "dependencies": [{"id": "main-task", "required": True}],
             },

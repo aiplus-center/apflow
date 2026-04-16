@@ -46,11 +46,6 @@ except ImportError:
 # NOTE: CrewAI and LLM extensions are NOT imported here to prevent background threads
 # They will be imported lazily when needed by specific tests
 try:
-    from apflow.extensions.stdio import SystemInfoExecutor, CommandExecutor  # noqa: F401
-except ImportError:
-    pass  # Extension not available, tests will handle this
-
-try:
     from apflow.extensions.http import RestExecutor  # noqa: F401
 except ImportError:
     pass  # Extension not available, tests will handle this
@@ -605,15 +600,6 @@ def ensure_executors_registered():
                 # Ignore registration errors - some executors may not be available
                 pass
 
-    # Ensure all required executors are registered
-    try:
-        from apflow.extensions.stdio import SystemInfoExecutor, CommandExecutor
-
-        ensure_registered(SystemInfoExecutor, "system_info_executor")
-        ensure_registered(CommandExecutor, "command_executor")
-    except ImportError:
-        pass
-
     # DO NOT import CrewAI here - it starts EventBus background thread immediately
     # CrewAI will be imported lazily when needed by specific tests
     # This prevents background threads from running in all tests
@@ -1159,19 +1145,7 @@ def _cleanup_all_global_state():
     except (ImportError, AttributeError):
         pass
 
-    # 5. Clean up Tool registry (both singleton and global instance)
-    try:
-        from apflow.core.tools.registry import ToolRegistry, _registry
-
-        # Reset singleton
-        ToolRegistry._instance = None
-        # Clear global instance state
-        if hasattr(_registry, "_tools"):
-            _registry._tools.clear()
-    except (ImportError, AttributeError):
-        pass
-
-    # 6. Clean up TaskExecutor singleton
+    # 5. Clean up TaskExecutor singleton
     try:
         from apflow.core.execution.task_executor import TaskExecutor
 
@@ -1180,7 +1154,7 @@ def _cleanup_all_global_state():
     except (ImportError, AttributeError):
         pass
 
-    # 7. Clean up Session registry state
+    # 6. Clean up Session registry state
     try:
         from apflow.core.storage.factory import SessionRegistry
 
@@ -1189,7 +1163,7 @@ def _cleanup_all_global_state():
     except (ImportError, AttributeError):
         pass
 
-    # 8. Clean up any thread-local state
+    # 7. Clean up any thread-local state
     try:
         from apflow.core.config.registry import _thread_local
 
@@ -1202,7 +1176,7 @@ def _cleanup_all_global_state():
     except (ImportError, AttributeError):
         pass
 
-    # 9. Clean up TaskTracker state (if exists)
+    # 8. Clean up TaskTracker state (if exists)
     try:
         from apflow.core.execution.task_tracker import TaskTracker
 

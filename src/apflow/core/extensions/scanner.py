@@ -117,7 +117,7 @@ class ExtensionScanner:
             return {}
 
         # Directories to skip (non-executor extensions)
-        skip_dirs = {"storage", "llm_key_config", "tools", "hooks", "__pycache__"}
+        skip_dirs = {"storage", "hooks", "__pycache__"}
 
         # Scan all Python files in extensions
         for py_file in extensions_dir.rglob("*.py"):
@@ -517,9 +517,9 @@ class ExtensionScanner:
             List of executor IDs belonging to the extension
 
         Example:
-            >>> ids = ExtensionScanner.get_executor_ids_by_extension("stdio")
+            >>> ids = ExtensionScanner.get_executor_ids_by_extension("http")
             >>> print(ids)
-            ['system_info_executor', 'command_executor']
+            ['rest_executor']
         """
         if not cls._scanned:
             cls.scan_builtin_executors()
@@ -527,7 +527,7 @@ class ExtensionScanner:
         result = []
         for executor_id, metadata in cls._metadata_cache.items():
             # Check if the extension name is in the module path
-            # e.g., "apflow.extensions.stdio.system_info_executor" contains "stdio"
+            # e.g., "apflow.extensions.http.rest_executor" contains "http"
             if f".{extension_name}." in metadata.module_path or metadata.module_path.endswith(
                 f".{extension_name}"
             ):

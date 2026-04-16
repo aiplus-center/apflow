@@ -27,7 +27,7 @@ class TestTaskExecutorConcurrentProtection:
         task = await repo.create_task(
             name="Test Task",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
         task_tree = TaskTreeNode(task)
@@ -66,13 +66,13 @@ class TestTaskExecutorConcurrentProtection:
         task1 = await repo.create_task(
             name="Test Task 1",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
         task2 = await repo.create_task(
             name="Test Task 2",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "memory"},
         )
 
@@ -112,7 +112,7 @@ class TestTaskExecutorConcurrentProtection:
         task = await repo.create_task(
             name="Slow Task",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
         task_tree = TaskTreeNode(task)
@@ -159,7 +159,7 @@ class TestTaskExecutorConcurrentProtection:
         task = await repo.create_task(
             name="Test Task",
             user_id="test-user",
-            schemas={"method": "system_info_executor"},
+            schemas={"method": "rest_executor"},
             inputs={"resource": "cpu"},
         )
         task_tree = TaskTreeNode(task)

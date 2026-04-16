@@ -6,6 +6,8 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "README.md"
+      - "apflow-logo.svg"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
@@ -30,6 +32,22 @@ jobs:
 
       - name: Install docs dependencies
         run: pip install -e ".[docs]"
+
+      - name: Prepare docs for MkDocs
+        run: |
+          # Copy README as index page
+          cp README.md docs/index.md
+
+          # Copy logo into docs assets
+          mkdir -p docs/assets
+          cp apflow-logo.svg docs/assets/
+
+          # Fix links in index.md: docs/X → X (since we're now inside docs/)
+          sed -i 's|\./docs/|./|g' docs/index.md
+          sed -i 's|(docs/|(|g' docs/index.md
+
+          # Fix logo reference in index.md
+          sed -i 's|\./apflow-logo\.svg|./assets/apflow-logo.svg|g' docs/index.md
 
       - run: mkdocs build
 

@@ -133,7 +133,7 @@ except Exception as e:
 
 For existing code:
 1. Replace `return {"success": False, "error": "..."}` with `raise BusinessError("...")`
-2. Remove try/except blocks around technical operations (httpx, docker, ssh)
+2. Remove try/except blocks around technical operations (httpx, aiosmtplib, sqlalchemy)
 3. Keep business validation and raise `ValidationError` or `ConfigurationError`
 4. Let timeout/connection/service errors propagate naturally
 

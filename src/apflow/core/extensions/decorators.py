@@ -216,10 +216,10 @@ def executor_register(
         from apflow.core.base import BaseTask
 
         @executor_register()
-        class SystemInfoExecutor(BaseTask):
-            id = "system_info_executor"
-            name = "System Info Executor"
-            type = "stdio"
+        class RestExecutor(BaseTask):
+            id = "rest_executor"
+            name = "REST Executor"
+            type = "http"
             ...
     """
 

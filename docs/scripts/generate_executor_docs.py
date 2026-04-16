@@ -165,41 +165,28 @@ def generate_example(executor_id: str) -> str:
                 "headers": {"Accept": "application/json"},
             },
         },
-        "command_executor": {
+        "send_email_executor": {
             "id": "550e8400-e29b-41d4-a716-446655440001",
-            "name": "Run Data Processing",
-            "schemas": {"method": "command_executor"},
-            "inputs": {"command": "python process.py --input data.json"},
+            "name": "Notify On Completion",
+            "schemas": {"method": "send_email_executor"},
+            "inputs": {
+                "provider": "smtp",
+                "to": ["ops@example.com"],
+                "subject": "Task done",
+                "body": "Pipeline finished",
+            },
         },
-        "scrape_executor": {
+        "aggregate_results_executor": {
             "id": "550e8400-e29b-41d4-a716-446655440002",
-            "name": "Extract Website Content",
-            "schemas": {"method": "scrape_executor"},
-            "inputs": {"url": "https://example.com", "extract_main_text": True},
+            "name": "Aggregate Upstream Results",
+            "schemas": {"method": "aggregate_results_executor"},
+            "inputs": {},
         },
-        "system_info_executor": {
+        "apflow_api_executor": {
             "id": "550e8400-e29b-41d4-a716-446655440003",
-            "name": "Get CPU Info",
-            "schemas": {"method": "system_info_executor"},
-            "inputs": {"resource": "cpu"},
-        },
-        "crewai_executor": {
-            "id": "550e8400-e29b-41d4-a716-446655440004",
-            "name": "AI Analysis Task",
-            "schemas": {"method": "crewai_executor"},
-            "inputs": {
-                "agents": [{"role": "Analyst", "goal": "Analyze data"}],
-                "tasks": [{"description": "Analyze input", "agent": "Analyst"}],
-            },
-        },
-        "generate_executor": {
-            "id": "550e8400-e29b-41d4-a716-446655440005",
-            "name": "Generate Task Tree",
-            "schemas": {"method": "generate_executor"},
-            "inputs": {
-                "requirement": "Fetch data from API and process it",
-                "generation_mode": "multi_phase",
-            },
+            "name": "Call apflow API",
+            "schemas": {"method": "apflow_api_executor"},
+            "inputs": {"endpoint": "/tasks", "payload": {"limit": 10}},
         },
     }
 

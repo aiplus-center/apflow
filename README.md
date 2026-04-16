@@ -171,7 +171,7 @@ These are examples and utilities. The real executors are your AI agents, busines
 
 - [PRD](docs/prd.md) — Product requirements
 - [Tech Design](docs/tech-design.md) — Architecture and design
-- [Feature Specs](docs/features/) — Implementation specifications
+- [Feature Specs](docs/features/overview.md) — Implementation specifications
 
 ## Contributing
 

@@ -41,7 +41,7 @@ theme:
 
 # Navigation
 nav:
-  - Home: getting-started/quick-start.md
+  - Home: index.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quick-start.md

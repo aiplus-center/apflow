@@ -85,7 +85,7 @@ class ExtensionRegistry:
         Example:
             # Register with instance (for simple executors)
             registry = get_registry()
-            registry.register(SystemInfoExecutor())
+            registry.register(RestExecutor())
 
             # Register with class (for executors that need per-task instantiation)
             registry.register(

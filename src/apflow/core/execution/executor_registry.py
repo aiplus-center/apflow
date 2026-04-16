@@ -27,13 +27,13 @@ class ExecutorRegistry:
 
     Example:
         # Register built-in executor
-        registry.register("system_info", SystemInfoExecutor)
+        registry.register("rest_executor", RestExecutor)
 
         # Register third-party executor
         registry.register("custom", CustomExecutor)
 
         # Get executor instance
-        executor = registry.get_executor("system_info", inputs={...})
+        executor = registry.get_executor("rest_executor", inputs={...})
     """
 
     _instance: Optional["ExecutorRegistry"] = None
@@ -59,7 +59,7 @@ class ExecutorRegistry:
         Register an executor for a task type
 
         Args:
-            task_type: Task type identifier (e.g., "stdio", "http", "ssh")
+            task_type: Task type identifier (e.g., "http", "email", "aggregate_results")
             executor_class: ExecutableTask class to register
             factory: Optional factory function to create executor instances.
                      If provided, this will be used instead of directly instantiating executor_class.
@@ -73,7 +73,7 @@ class ExecutorRegistry:
 
         Example:
             # Register with class
-            registry.register("system_info", SystemInfoExecutor)
+            registry.register("rest_executor", RestExecutor)
 
             # Register with factory function
             def create_custom_executor(inputs):

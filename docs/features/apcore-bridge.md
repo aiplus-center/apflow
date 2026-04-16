@@ -37,7 +37,15 @@ Contains `discover_executor_modules()` function and `_create_adapter_from_metada
 
 **`src/apflow/bridge/task_modules.py`**
 
-Contains `TaskCreateModule`, `TaskExecuteModule`, `TaskListModule`, `TaskGetModule`, `TaskDeleteModule` classes.
+Contains all task management module classes. The canonical list is maintained in
+`src/apflow/bridge/registry_setup.py` (the `task_modules` dict); any additions
+there must be re-exported here. Current set (16 modules):
+
+- Lifecycle: `TaskCreateModule`, `TaskCreateTreeModule`, `TaskExecuteModule`, `TaskCancelModule`
+- Read/write: `TaskGetModule`, `TaskUpdateModule`, `TaskListModule`, `TaskDeleteModule`
+- Tree: `TaskTreeModule`, `TaskChildrenModule`
+- Composition: `TaskLinkModule`, `TaskCopyModule`, `TaskArchiveModule`, `TaskCloneMixedModule`
+- Queries: `TaskRunningListModule`, `TaskScheduledListModule`
 
 **`src/apflow/bridge/registry_setup.py`**
 
@@ -338,7 +346,7 @@ def test_discover_executor_modules_returns_list():
     """discover_executor_modules returns a list of adapters."""
     adapters = discover_executor_modules()
     assert isinstance(adapters, list)
-    assert len(adapters) > 0  # At least REST, SSH, Docker, etc.
+    assert len(adapters) > 0  # At least REST, Email, AggregateResults, ApflowApi
 
 def test_discover_executor_modules_has_rest():
     """REST executor is discovered."""
@@ -442,5 +450,5 @@ async def test_registry_custom_namespace():
 3. `apcore-cli` can generate CLI commands for registered modules (verified by calling `create_cli(registry)` and running `--help`).
 4. Each module has valid JSON Schema for inputs and outputs (input_schema and output_schema are non-empty dicts with "type" key).
 5. Module registration is automatic: adding a new `@executor_register` decorated class causes it to appear in the registry without any code changes to the bridge.
-6. All executor modules from preserved extensions are registered: rest, ssh, docker, email, scrape, websocket, mcp, command (8 executors minimum).
-7. All 5 task management modules are registered: task.create, task.execute, task.list, task.get, task.delete.
+6. All built-in executor modules are registered: rest, send_email, aggregate_results, apflow_api (4 executors).
+7. All 16 task management modules are registered (see `registry_setup.py` → `task_modules` as source of truth): task.create, task.create_tree, task.execute, task.cancel, task.get, task.update, task.list, task.delete, task.tree, task.children, task.link, task.copy, task.archive, task.clone_mixed, task.running, task.scheduled.

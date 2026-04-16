@@ -178,7 +178,7 @@ All imports work without circular dependencies:
 from apflow.core.extensions import ExtensionRegistry
 from apflow.core.interfaces import ExecutableTask
 from apflow.core.extensions.protocol import ExecutorLike
-from apflow.extensions.stdio import StdioExecutor
+from apflow.extensions.http import RestExecutor
 ```
 
 ## Future Extensions

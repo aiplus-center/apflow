@@ -147,7 +147,7 @@ apflow v2 registers its capabilities as apcore Modules. The apcore ecosystem aut
 
 **Description:** Remove all self-built protocol layers, CLI, and extensions that are superseded by the apcore ecosystem or out of scope for v2.
 
-**What to delete (~17,561 lines, ~64 files):**
+**What to delete (~19,938 lines, ~76 files):**
 
 | Module | Lines | Files | Replacement |
 |---|---|---|---|
@@ -158,9 +158,16 @@ apflow v2 registers its capabilities as apcore Modules. The apcore ecosystem aut
 | `cli/` | ~6,979 | 18 | apcore-cli |
 | `extensions/crewai/` | ~1,747 | 4 | Future: thin agent adapter |
 | `extensions/llm/` | ~251 | 2 | Future: agent adapter |
+| `extensions/llm_key_config/` | ~158 | 2 | Dropped (dead — no importers) |
 | `extensions/generate/` | ~3,651 | 8 | Dropped (code generation) |
 | `extensions/grpc/` | ~314 | 2 | Dropped |
 | `extensions/tools/` | ~473 | 3 | Dropped |
+| `extensions/ssh/` | ~342 | 2 | Dropped (out of core scope) |
+| `extensions/docker/` | ~394 | 2 | Dropped (out of core scope) |
+| `extensions/scrape/` | ~117 | 2 | Dropped (out of core scope) |
+| `extensions/websocket/` | ~277 | 2 | Dropped (out of core scope) |
+| `extensions/mcp/` | ~523 | 2 | Dropped (apcore-mcp replaces client usage) |
+| `extensions/stdio/` | ~566 | 2 | Dropped (out of core scope) |
 
 **What to update:**
 - `pyproject.toml`: remove deleted extras (`a2a`, `cli`, `graphql`, `crewai`, `llm`, `grpc`, `tools`, `standard`, `all`); add `apcore>=0.14.0`, `apcore-mcp>=0.10.1`, `apcore-a2a`, `apcore-cli>=0.3.0` as dependencies or extras
@@ -172,7 +179,7 @@ apflow v2 registers its capabilities as apcore Modules. The apcore ecosystem aut
 2. `pyproject.toml` has no references to deleted modules.
 3. `pip install apflow` succeeds with only core + apcore dependencies.
 4. Remaining test suite passes (tests for deleted modules are also removed).
-5. Total source line count drops from ~48.5k to ~31k.
+5. Total source line count drops from ~48.5k to ~25.2k.
 
 **Priority:** P0
 **Estimated effort:** 3-5 days
@@ -186,15 +193,11 @@ apflow v2 registers its capabilities as apcore Modules. The apcore ecosystem aut
 **Requirements:**
 1. Create `bridge/` module with apcore registration logic.
 2. Adapt `ExecutableTask` to implement the apcore Module interface (schema-enforced input/output, metadata).
-3. Register traditional executors as apcore Modules:
+3. Register built-in executors as apcore Modules:
    - REST executor -> `apflow.rest` module
-   - SSH executor -> `apflow.ssh` module
-   - Docker executor -> `apflow.docker` module
    - Email executor -> `apflow.email` module
-   - Scrape executor -> `apflow.scrape` module
-   - WebSocket executor -> `apflow.websocket` module
-   - MCP executor -> `apflow.mcp` module
-   - Command/stdio executor -> `apflow.command` module
+   - AggregateResults executor -> `apflow.aggregate_results` module
+   - ApFlowApi executor -> `apflow.apflow_api_executor` module
 4. Register TaskRoutes handlers (create, execute, list, get, delete) as apcore Modules.
 5. Initialize apcore Registry on apflow startup.
 
@@ -454,7 +457,7 @@ Layer 2: apflow v2 (THIS PRODUCT)
   │         Task Orchestration Engine            │
   │  TaskManager │ TaskCreator │ TaskExecutor    │
   ├─────────────────────────────────────────────┤
-  │         Executors (REST, SSH, Docker, ...)   │
+  │   Executors (REST, Email, Aggregate, Api)    │
   ├─────────────────────────────────────────────┤
   │         Storage (SQLite / PostgreSQL)         │
   └─────────────────────────────────────────────┘
@@ -468,7 +471,7 @@ Layer 1: Agent Frameworks (USER'S CHOICE — not built by apflow)
 
 ### Code Inventory
 
-**What is deleted (~17,561 lines):**
+**What is deleted (~19,938 lines):**
 
 | Module | Lines | Reason |
 |---|---|---|
@@ -479,30 +482,30 @@ Layer 1: Agent Frameworks (USER'S CHOICE — not built by apflow)
 | `cli/` | 6,979 | Replaced by apcore-cli |
 | `extensions/crewai/` | 1,747 | Replaced by thin adapter (P1) |
 | `extensions/llm/` | 251 | Replaced by agent adapter (P1) |
+| `extensions/llm_key_config/` | 158 | Dropped (dead — no importers) |
 | `extensions/generate/` | 3,651 | Dropped (code generation out of scope) |
 | `extensions/grpc/` | 314 | Dropped |
 | `extensions/tools/` | 473 | Dropped |
+| `extensions/ssh/` | 342 | Dropped (out of core scope) |
+| `extensions/docker/` | 394 | Dropped (out of core scope) |
+| `extensions/scrape/` | 117 | Dropped (out of core scope) |
+| `extensions/websocket/` | 277 | Dropped (out of core scope) |
+| `extensions/mcp/` | 523 | Dropped (apcore-mcp replaces client usage) |
+| `extensions/stdio/` | 566 | Dropped (out of core scope) |
 
-**What is preserved (~30,965 lines):**
+**What is preserved (~25,249 lines):**
 
 | Module | Lines | Notes |
 |---|---|---|
-| `core/` | 18,974 | Task engine, models, executors, distributed runtime — the heart of apflow |
-| `scheduler/` | 2,035 | Task scheduling |
-| `extensions/ssh/` | 342 | SSH executor |
-| `extensions/docker/` | 394 | Docker executor |
+| `core/` | 18,319 | Task engine, models, executors, distributed runtime — the heart of apflow |
+| `scheduler/` | 2,028 | Task scheduling |
+| `extensions/http/` | 346 | HTTP/REST executor |
 | `extensions/email/` | 425 | Email executor |
-| `extensions/scrape/` | 117 | Web scrape executor |
-| `extensions/websocket/` | 277 | WebSocket executor |
-| `extensions/mcp/` | 523 | MCP client executor (not server) |
-| `extensions/http/` | 340 | HTTP/REST executor |
-| `extensions/stdio/` | 566 | Stdio executor |
-| `extensions/apflow/` | 651 | Internal executors |
-| `extensions/core/` | 234 | Core extension utilities |
+| `extensions/apflow/` | 651 | ApFlowApi executor |
+| `extensions/core/` | 234 | AggregateResults executor |
 | `extensions/hooks/` | 153 | Hook system |
-| `extensions/llm_key_config/` | 158 | LLM key management |
-| `extensions/storage/` | 210 | Storage extension |
-| Other files | ~5,566 | `__init__.py`, `logger.py`, etc. |
+| `extensions/storage/` | 162 | Storage extension |
+| Other files | ~2,885 | `adapters/`, `app.py`, `bridge/`, `cli.py`, `durability/`, `governance/`, `logger.py`, etc. |
 
 **What is new (estimated ~3,000-5,000 lines):**
 
@@ -619,7 +622,7 @@ Layer 1: Agent Frameworks (USER'S CHOICE — not built by apflow)
 
 2. ~~**Cost data source:**~~ **RESOLVED.** Executors report token usage via the `execute()` return dict (`token_usage: {input, output, total}`). This is framework-agnostic and requires no LiteLLM dependency. See tech-design Section 4.5 and feature spec `cost-governance.md`.
 
-3. ~~**apcore Module granularity:**~~ **RESOLVED.** Each executor is a separate apcore Module (e.g., `apflow.rest_executor`, `apflow.ssh_executor`). Task management operations are also separate modules (`apflow.task.create`, etc.). See tech-design Section 4.3 and feature spec `apcore-bridge.md`.
+3. ~~**apcore Module granularity:**~~ **RESOLVED.** Each executor is a separate apcore Module (e.g., `apflow.rest_executor`, `apflow.send_email_executor`). Task management operations are also separate modules (`apflow.task.create`, etc.). See tech-design Section 4.3 and feature spec `apcore-bridge.md`.
 
 4. **Budget scope hierarchy:** Should per-task budgets roll up into per-user budgets automatically, or are they independent? Hierarchical budgets add complexity but are more useful for platform teams. *Note: MVP implements per-task budgets only. Per-user aggregation is available via `UsageReporter` but not enforced as a budget.*
 

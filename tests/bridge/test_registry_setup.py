@@ -36,7 +36,7 @@ class TestCreateApflowRegistry:
         manager, creator, repo = _mock_dependencies()
         registry = create_apflow_registry(manager, creator, repo)
         modules = list(registry.list())
-        # At least rest_executor and system_info_executor should be registered
+        # At least one executor (e.g., rest_executor) should be registered
         executor_modules = [m for m in modules if not m.startswith("apflow.task.")]
         assert len(executor_modules) > 0
 
